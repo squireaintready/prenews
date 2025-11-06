@@ -1,10 +1,9 @@
-# .github/workflows/update.yml
 name: Update Prediction Pulse
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
-  workflow_dispatch:       # Manual trigger
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   generate:
@@ -18,12 +17,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install backend deps
         run: |
           cd backend
           npm ci
 
-      - name: Run generator
+      - name: Generate articles
         run: |
           cd backend
           node generate.js

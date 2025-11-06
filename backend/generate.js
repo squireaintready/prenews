@@ -1,19 +1,21 @@
-// prenews/backend/generate.js
+// backend/generate.js
 require('dotenv').config();
 const axios = require('axios');
 const admin = require('firebase-admin');
 
+// GET CREDENTIALS FROM ENV VAR (GitHub Secret)
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
 
-const LIMIT = 25; // change to 1-20 for testing, 20 for full run
+const LIMIT = 10;
 
 (async () => {
   try {
@@ -60,11 +62,11 @@ Today: November 06, 2025`;
         favored,
         odds,
         volume24hr: e.volume24hr || 0,
-        endDate: e.endDate,        // ← EXPIRE DATE
+        endDate: e.endDate,
         createdAt: new Date()
       });
 
-      console.log('ADDED:', e.title, '|', favored, odds, '| Expires:', e.endDate);
+      console.log('ADDED:', e.title, '|', favored, odds);
     }
 
     console.log('FINISHED – All done');
