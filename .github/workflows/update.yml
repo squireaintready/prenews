@@ -1,17 +1,32 @@
-name: Update News
+# .github/workflows/update.yml
+name: Update Prediction Pulse
+
 on:
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:       # Manual trigger
+
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: cd backend && npm i
-      - run: cd backend && node generate.js
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run generator
+        run: |
+          cd backend
+          node generate.js
         env:
-          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          REACT_APP_GEMINI_KEY: ${{ secrets.REACT_APP_GEMINI_KEY }}
+          FIREBASE_ADMIN_SDK: ${{ secrets.FIREBASE_ADMIN_SDK }}
