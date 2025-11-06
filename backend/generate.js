@@ -2,7 +2,8 @@
 require('dotenv').config();
 const axios = require('axios');
 const admin = require('firebase-admin');
-const serviceAccount = require('./adminsdk.json');
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

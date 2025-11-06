@@ -10,6 +10,7 @@
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "firebase": "^12.5.0",
+    "git-filter-repo": "^0.0.30",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-scripts": "5.0.1",
