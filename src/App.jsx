@@ -1,39 +1,38 @@
-// src/App.jsx – FINAL FINAL FINAL
-import { useState, useEffect, useRef } from "react";
-import { db } from "./firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import "./App.css";
+// src/App.jsx – FULL FINAL VERSION WITH LIVE TABS & AUTO-REFRESH
+import { useState, useEffect } from 'react';
+import { db } from './firebase';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import './App.css';
 
 function App() {
-  const [articles, setArticles] = useState([]);
-  const [expanded, setExpanded] = useState(null);
-  const cardRefs = useRef({});
+  const [active, setActive] = useState([]);
+  const [expired, setExpired] = useState([]);
+  const [tab, setTab] = useState('active');
 
   useEffect(() => {
-    const q = query(collection(db, "articles"), orderBy("volume24hr", "desc"));
-    getDocs(q).then((snap) => {
-      setArticles(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    const q = query(collection(db, 'articles'), orderBy('volume24hr', 'desc'));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const now = Date.now();
+      const activeList = [];
+      const expiredList = [];
+
+      snapshot.docs.forEach(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        if (data.endDate && new Date(data.endDate) < now) {
+          expiredList.push(data);
+        } else {
+          activeList.push(data);
+        }
+      });
+
+      setActive(activeList);
+      setExpired(expiredList.sort((a, b) => new Date(b.endDate) - new Date(a.endDate)));
     });
+
+    return () => unsub();
   }, []);
 
-  const handleExpand = (id) => {
-    setExpanded(id);
-    setTimeout(() => {
-      cardRefs.current[id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 100);
-  };
-
-  const handleCardClick = (id, e) => {
-    // Don't expand if clicking a link or button
-    if (e.target.closest("a") || e.target.closest("button")) return;
-    if (expanded !== id) handleExpand(id);
-  };
-
-  if (articles.length === 0)
-    return <div className="loading">Loading PolyPulse...</div>;
+  const articles = tab === 'active' ? active : expired;
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -46,22 +45,52 @@ function App() {
     if (diffDays > 0) return `Expires in ${diffDays}d`;
     if (diffHours > 0) return `Expires in ${diffHours}h`;
     if (diffMins > 0) return `Expires in ${diffMins}m`;
-    return "Expiring now";
+    return 'Expiring now';
   };
+
+  const handleCardClick = (id, e) => {
+    if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.readmore-text')) return;
+    setTab('active');
+    setTimeout(() => {
+      document.getElementById(`card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+    setExpanded(id);
+  };
+
+  const [expanded, setExpanded] = useState(null);
+
+  if (active.length + expired.length === 0) {
+    return <div className="loading">Loading PolyPulse...</div>;
+  }
 
   return (
     <div className="App">
       <header className="header">
         <h1>PolyPulse News</h1>
-        <p className="tagline">Markets don't lie. We translate.</p>
+        <p className="tagline">Markets don't lie.</p>
       </header>
 
+      <div className="tabs">
+        <button
+          onClick={() => setTab('active')}
+          className={tab === 'active' ? 'active' : ''}
+        >
+          Active ({active.length})
+        </button>
+        <button
+          onClick={() => setTab('expired')}
+          className={tab === 'expired' ? 'active' : ''}
+        >
+          Expired ({expired.length})
+        </button>
+      </div>
+
       <div className="grid">
-        {articles.map((a) => (
+        {articles.map(a => (
           <article
             key={a.id}
-            ref={(el) => (cardRefs.current[a.id] = el)}
-            className={`card ${expanded === a.id ? "full" : ""}`}
+            id={`card-${a.id}`}
+            className={`card ${expanded === a.id ? 'full' : ''}`}
             onClick={(e) => handleCardClick(a.id, e)}
           >
             <a
@@ -73,11 +102,7 @@ function App() {
             >
               <div className="card-header">
                 <div className="header-row">
-                  <img
-                    src={a.image || "/placeholder.png"}
-                    alt=""
-                    className="market-icon"
-                  />
+                  <img src={a.image || '/placeholder.png'} alt="" className="market-icon" />
                   <div className={`odds-badge ${a.favored.toLowerCase()}`}>
                     <span className="favored">{a.favored}</span>
                     <span className="odds">{a.odds}</span>
@@ -100,10 +125,7 @@ function App() {
                 <>
                   <p className="article">{a.article}</p>
                   <div className="btn-group">
-                    <button
-                      onClick={() => setExpanded(null)}
-                      className="btn-collapse"
-                    >
+                    <button onClick={(e) => { e.stopPropagation(); setExpanded(null); }} className="btn-collapse">
                       Collapse
                     </button>
                     <a
@@ -120,14 +142,14 @@ function App() {
               ) : (
                 <>
                   <p className="teaser">
-                    {a.article.split(" ").slice(0, 120).join(" ")}
-                    {a.article.split(" ").length > 120 && "…"}
+                    {a.article.split(' ').slice(0, 120).join(' ')}
+                    {a.article.split(' ').length > 120 && '…'}
                   </p>
                   <div
                     className="readmore-text"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleExpand(a.id);
+                      handleCardClick(a.id, e);
                     }}
                   >
                     Read More
