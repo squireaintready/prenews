@@ -1,4 +1,4 @@
-/* src/App.css – COMPLETE FINAL FILE */
+/* src/App.css – FINAL MASTERPIECE (deploy this) */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
@@ -10,14 +10,18 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 }
 .header h1 {
   font-size: 4.5rem;
-  background: linear-gradient(135deg, #00f5ff, #ff00c8);
+  background: linear-gradient(135deg, #ff00c8, #00f5ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
   font-weight: 900;
   letter-spacing: -2px;
 }
-.tagline { color: #888; font-size: 1.2rem; margin-top: 0.5rem; }
+.tagline { 
+  color: #888; 
+  font-size: 1.2rem; 
+  margin-top: 0.5rem; 
+}
 
 .tabs {
   display: flex;
@@ -36,9 +40,9 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   transition: all 0.3s ease;
 }
 .tabs button.active {
-  background: linear-gradient(135deg, #00f5ff, #ff00c8);
+  background: linear-gradient(135deg, #ff00c8, #00f5ff);
   color: #000;
-  box-shadow: 0 6px 20px rgba(0,255,255,0.4);
+  box-shadow: 0 6px 20px rgba(255, 0, 200, 0.4);
 }
 
 .grid {
@@ -58,10 +62,20 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   border: 1px solid #222;
   cursor: pointer;
 }
-.card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0,255,255,0.15); }
-.card.full { grid-column: 1/-1; max-width: 900px; margin: 0 auto; }
+.card:hover { 
+  transform: translateY(-8px); 
+  box-shadow: 0 30px 60px rgba(0,255,255,0.15); 
+}
+.card.full { 
+  grid-column: 1/-1; 
+  max-width: 900px; 
+  margin: 0 auto; 
+}
 
-.card-header { padding: 1.5rem; background: #0d0d0d; }
+.card-header { 
+  padding: 1.5rem; 
+  background: #0d0d0d; 
+}
 .header-row {
   display: grid;
   grid-template-columns: auto auto 1fr;
@@ -94,19 +108,29 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   transition: all 0.3s ease;
 }
 .odds-badge.yes {
-  border-color: #00ff9d;
-  background: linear-gradient(135deg, #003f2f, #00ff9d22);
-  color: #00ff9d;
-  box-shadow: 0 4px 15px rgba(0,255,157,0.3);
+  border-color: #00b380;
+  background: linear-gradient(135deg, #001f17, #00b38018);
+  color: #00e6a3;
+  box-shadow: 0 4px 12px rgba(0, 179, 128, 0.22);
 }
 .odds-badge.no {
-  border-color: #ff3366;
-  background: linear-gradient(135deg, #3f000f, #ff336622);
+  border-color: #cc0033;
+  background: linear-gradient(135deg, #1f0008, #cc003318);
   color: #ff3366;
-  box-shadow: 0 4px 15px rgba(255,51,102,0.3);
+  box-shadow: 0 4px 12px rgba(204, 0, 51, 0.22);
 }
-.favored { display: block; font-size: 0.95rem; letter-spacing: 1px; }
-.odds { display: block; font-size: 1.65rem; line-height: 1; margin-top: -3px; font-weight: 900; }
+.favored { 
+  display: block; 
+  font-size: 0.95rem; 
+  letter-spacing: 1px; 
+}
+.odds { 
+  display: block; 
+  font-size: 1.65rem; 
+  line-height: 1; 
+  margin-top: -3px; 
+  font-weight: 900; 
+}
 
 .question {
   font-size: 1.15rem;
@@ -132,10 +156,10 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 }
 .prob-bar .fill {
   height: 100%;
-  background: linear-gradient(90deg, #00ff9d, #00c853);
+  background: linear-gradient(90deg, #00b380, #008c66);
   border-radius: 5px;
   transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 0 20px rgba(0,255,157,0.7);
+  box-shadow: 0 0 14px rgba(0, 179, 128, 0.4);
 }
 
 .expire-timer {
@@ -147,14 +171,21 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   letter-spacing: 0.5px;
 }
 
-.content { padding: 1.5rem; }
-.hook {
-  font-size: 1.6rem;
-  line-height: 1.4;
-  margin: 0 0 1rem;
-  color: #00f5ff;
-  font-weight: 700;
+.content { 
+  padding: 1.5rem; 
 }
+.hook {
+  font-size: 1.65rem;
+  line-height: 1.35;
+  margin: 0 0 1.2rem;
+  color: #00d4ff;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+}
+
 .teaser {
   line-height: 1.75;
   margin: 1.3rem 0;
@@ -169,17 +200,19 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 }
 
 .readmore-text {
-  color: #00f5ff;
+  color: #00b3cc;
   font-weight: 800;
   font-size: 1.1rem;
   cursor: pointer;
   margin-top: 1rem;
   display: inline-block;
 }
-.readmore-text:hover { text-decoration: underline; }
+.readmore-text:hover { 
+  text-decoration: underline; 
+}
 
 button, .btn-bet {
-  background: linear-gradient(135deg, #00f5ff, #0099cc);
+  background: linear-gradient(135deg, #00f5ff, #ff00c8);
   color: #000;
   border: none;
   padding: 0.9rem 2rem;
@@ -188,21 +221,24 @@ button, .btn-bet {
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(0,245,255,0.3);
+  box-shadow: 0 6px 20px rgba(255, 0, 200, 0.3);
   text-decoration: none;
   display: inline-block;
 }
 button:hover, .btn-bet:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,245,255,0.5);
+  box-shadow: 0 12px 30px rgba(255, 0, 200, 0.45);
 }
-.btn-collapse { background: #333; color: #aaa; }
+.btn-collapse { 
+  background: #333; 
+  color: #aaa; 
+}
 .btn-bet {
-  background: linear-gradient(135deg, #00ff9d, #00c853) !important;
-  box-shadow: 0 6px 20px rgba(0,255,157,0.5) !important;
+  background: linear-gradient(135deg, #00b380, #008c66) !important;
+  box-shadow: 0 6px 20px rgba(0, 179, 128, 0.35) !important;
 }
 .btn-bet:hover {
-  box-shadow: 0 12px 30px rgba(0,255,157,0.7) !important;
+  box-shadow: 0 12px 30px rgba(0, 179, 128, 0.5) !important;
 }
 
 .btn-group {
@@ -216,5 +252,5 @@ button:hover, .btn-bet:hover {
   text-align: center;
   font-size: 2rem;
   padding: 6rem;
-  color: #00f5ff;
+  color: #00b3cc;
 }

@@ -1,5 +1,5 @@
-// src/App.jsx – FULL FINAL VERSION WITH LIVE TABS & AUTO-REFRESH
-import { useState, useEffect } from 'react';
+// src/App.jsx – FIXED EXPAND + TITLE CHANGE
+import { useState, useEffect, useRef } from 'react';
 import { db } from './firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import './App.css';
@@ -8,80 +8,55 @@ function App() {
   const [active, setActive] = useState([]);
   const [expired, setExpired] = useState([]);
   const [tab, setTab] = useState('active');
+  const [expanded, setExpanded] = useState(null);
+  const cardRefs = useRef({});
 
   useEffect(() => {
     const q = query(collection(db, 'articles'), orderBy('volume24hr', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
       const now = Date.now();
-      const activeList = [];
-      const expiredList = [];
-
+      const act = [];
+      const exp = [];
       snapshot.docs.forEach(doc => {
         const data = { id: doc.id, ...doc.data() };
-        if (data.endDate && new Date(data.endDate) < now) {
-          expiredList.push(data);
-        } else {
-          activeList.push(data);
-        }
+        if (data.endDate && new Date(data.endDate) < now) exp.push(data);
+        else act.push(data);
       });
-
-      setActive(activeList);
-      setExpired(expiredList.sort((a, b) => new Date(b.endDate) - new Date(a.endDate)));
+      setActive(act);
+      setExpired(exp.sort((a, b) => new Date(b.endDate) - new Date(a.endDate)));
     });
-
-    return () => unsub();
+    return unsub;
   }, []);
+
+  const expandAndSnap = (id) => {
+    setExpanded(id);
+    setTimeout(() => cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  };
+
+  const handleCardClick = (e) => {
+    if (e.target.closest('a, button')) return;
+    const card = e.currentTarget;
+    const id = card.dataset.id;
+    expandAndSnap(id);
+  };
 
   const articles = tab === 'active' ? active : expired;
 
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diffMs = d - now;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffDays > 0) return `Expires in ${diffDays}d`;
-    if (diffHours > 0) return `Expires in ${diffHours}h`;
-    if (diffMins > 0) return `Expires in ${diffMins}m`;
-    return 'Expiring now';
-  };
-
-  const handleCardClick = (id, e) => {
-    if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.readmore-text')) return;
-    setTab('active');
-    setTimeout(() => {
-      document.getElementById(`card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-    setExpanded(id);
-  };
-
-  const [expanded, setExpanded] = useState(null);
-
-  if (active.length + expired.length === 0) {
-    return <div className="loading">Loading PolyPulse...</div>;
-  }
+  if (articles.length === 0) return <div className="loading">Loading...</div>;
 
   return (
     <div className="App">
       <header className="header">
-        <h1>PolyPulse News</h1>
+        <h1>Prediction Pulse</h1>
         <p className="tagline">Markets don't lie.</p>
       </header>
 
       <div className="tabs">
-        <button
-          onClick={() => setTab('active')}
-          className={tab === 'active' ? 'active' : ''}
-        >
+        <button onClick={() => setTab('active')} className={tab === 'active' ? 'active' : ''}>
           Active ({active.length})
         </button>
-        <button
-          onClick={() => setTab('expired')}
-          className={tab === 'expired' ? 'active' : ''}
-        >
-          Expired ({expired.length})
+        <button onClick={() => setTab('expired')} className={tab === 'expired' ? 'active' : ''}>
+          Past ({expired.length})
         </button>
       </div>
 
@@ -89,17 +64,12 @@ function App() {
         {articles.map(a => (
           <article
             key={a.id}
-            id={`card-${a.id}`}
+            data-id={a.id}
+            ref={el => cardRefs.current[a.id] = el}
             className={`card ${expanded === a.id ? 'full' : ''}`}
-            onClick={(e) => handleCardClick(a.id, e)}
+            onClick={handleCardClick}
           >
-            <a
-              href={`https://polymarket.com/event/${a.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="header-link"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <a href={`https://polymarket.com/event/${a.slug}`} target="_blank" rel="noopener noreferrer" className="header-link" onClick={e => e.stopPropagation()}>
               <div className="card-header">
                 <div className="header-row">
                   <img src={a.image || '/placeholder.png'} alt="" className="market-icon" />
@@ -109,12 +79,8 @@ function App() {
                   </div>
                   <h3 className="question">{a.title}</h3>
                 </div>
-                <div className="prob-bar">
-                  <div className="fill" style={{ width: a.odds }} />
-                </div>
-                <div className="expire-timer">
-                  {a.endDate && formatDate(a.endDate)}
-                </div>
+                <div className="prob-bar"><div className="fill" style={{ width: a.odds }} /></div>
+                <div className="expire-timer">{a.endDate && formatDate(a.endDate)}</div>
               </div>
             </a>
 
@@ -125,33 +91,16 @@ function App() {
                 <>
                   <p className="article">{a.article}</p>
                   <div className="btn-group">
-                    <button onClick={(e) => { e.stopPropagation(); setExpanded(null); }} className="btn-collapse">
-                      Collapse
-                    </button>
-                    <a
-                      href={`https://polymarket.com/event/${a.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-bet"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <button onClick={e => { e.stopPropagation(); setExpanded(null); }} className="btn-collapse">Collapse</button>
+                    <a href={`https://polymarket.com/event/${a.slug}`} target="_blank" rel="noopener noreferrer" className="btn-bet" onClick={e => e.stopPropagation()}>
                       Bet Now
                     </a>
                   </div>
                 </>
               ) : (
                 <>
-                  <p className="teaser">
-                    {a.article.split(' ').slice(0, 120).join(' ')}
-                    {a.article.split(' ').length > 120 && '…'}
-                  </p>
-                  <div
-                    className="readmore-text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCardClick(a.id, e);
-                    }}
-                  >
+                  <p className="teaser">{a.article.split(' ').slice(0, 120).join(' ')}{a.article.split(' ').length > 120 && '…'}</p>
+                  <div className="readmore-text" onClick={e => { e.stopPropagation(); expandAndSnap(a.id); }}>
                     Read More
                   </div>
                 </>
@@ -163,5 +112,18 @@ function App() {
     </div>
   );
 }
+
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = d - now;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays > 0) return `Expires in ${diffDays}d`;
+  if (diffHours > 0) return `Expires in ${diffHours}h`;
+  if (diffMins > 0) return `Expires in ${diffMins}m`;
+  return 'Expiring now';
+};
 
 export default App;
