@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL @sompiUP — NOV 06 2025 10:25 PM EST
+// src/App.jsx — FINAL @sompiUP — NOV 07 2025 01:58 AM EST
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -28,28 +28,34 @@ function App() {
     return unsub;
   }, []);
 
-  const expandAndSnap = (id) => {
-    setExpanded(id);
-    setTimeout(
-      () =>
-        cardRefs.current[id]?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        }),
-      50
-    );
+  const toggleExpand = (id) => {
+    if (expanded === id) {
+      setExpanded(null);
+    } else {
+      setExpanded(id);
+      setTimeout(
+        () =>
+          cardRefs.current[id]?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          }),
+        50
+      );
+    }
   };
 
   const handleCardClick = (e) => {
-    if (e.target.closest("a, button")) return;
+    if (e.target.closest("a, button, .readmore-text")) return;
     const card = e.currentTarget;
     const id = card.dataset.id;
-    expandAndSnap(id);
+    toggleExpand(id);
   };
 
   const articles = tab === "active" ? active : expired;
 
   if (articles.length === 0) return <div className="loading">Loading...</div>;
+
+  const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   return (
     <div className="App">
@@ -74,104 +80,111 @@ function App() {
       </div>
 
       <div className="grid">
-        {articles.map((a) => (
-          <article
-            key={a.id}
-            data-id={a.id}
-            ref={(el) => (cardRefs.current[a.id] = el)}
-            className={`card ${expanded === a.id ? "full" : ""}`}
-            onClick={handleCardClick}
-          >
-            <a
-              href={`https://polymarket.com/event/${a.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="header-link"
-              onClick={(e) => e.stopPropagation()}
+        {articles.map((a) => {
+          const cleanArticle = a.article
+            ? a.article.replace(new RegExp(`^${escapeRegExp(a.hook)}`, "i"), "").trim()
+            : "Loading article...";
+
+          return (
+            <article
+              key={a.id}
+              data-id={a.id}
+              ref={(el) => (cardRefs.current[a.id] = el)}
+              className={`card ${expanded === a.id ? "full" : ""}`}
+              onClick={handleCardClick}
             >
-              <div className="card-header">
-                <div className="header-row">
-                  <img
-                    src={a.image || "/placeholder.png"}
-                    alt=""
-                    className="market-icon"
-                  />
-                  <div
-                    className={`odds-badge ${
-                      a.favored?.toLowerCase() || "yes"
-                    }`}
-                  >
-                    <span className="favored">{a.favored || "Yes"}</span>
-                    <span className="odds">{a.odds || "—"}</span>
+              <a
+                href={`https://polymarket.com/event/${a.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="header-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="card-header">
+                  <div className="header-row">
+                    <img
+                      src={a.image || "/placeholder.png"}
+                      alt=""
+                      className="market-icon"
+                    />
+                    <div
+                      className={`odds-badge ${a.favored?.toLowerCase() || "yes"}`}
+                    >
+                      <span className="favored">{a.favored || "Yes"}</span>
+                      <span className="odds">{a.odds || "—"}</span>
+                    </div>
+                    <h3 className="question">{a.title || "Loading..."}</h3>
                   </div>
-                  <h3 className="question">{a.title || "Loading..."}</h3>
-                </div>
 
-                {/* EXPIRES — TOP OF CARD — WALL STREET STYLE */}
-                <div className="expire-timer-top">
-                  {a.endDate && formatDate(a.endDate)}
-                </div>
+                  <div className="prob-bar">
+                    <div className="fill" style={{ width: a.odds || "0%" }} />
+                  </div>
 
-                <div className="prob-bar">
-                  <div className="fill" style={{ width: a.odds || "0%" }} />
-                </div>
+                  <div className="market-stats">
+                    <span>Vol: ${a.volume24hr?.toLocaleString() || 0}</span>
+                    <span>Liquidity: ${a.liquidity?.toLocaleString() || 0}</span>
+                    <span>Open Int: ${a.openInterest?.toLocaleString() || 0}</span>
+                  </div>
 
-                <div className="market-stats">
-                  <span>Vol: ${a.volume24hr?.toLocaleString() || 0}</span>
-                  <span>Liquidity: ${a.liquidity?.toLocaleString() || 0}</span>
-                  {/* <span>Open Int: ${a.openInterest?.toLocaleString() || 0}</span> */}
+                  <div className="expire-timer-top">
+                    {a.endDate && formatDate(a.endDate)}
+                  </div>
                 </div>
-              </div>
-            </a>
+              </a>
 
-            {/* Collapsible content — click anywhere to expand/collapse */}
-            <div
-              className="content"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (expanded === a.id) setExpanded(null);
-                else expandAndSnap(a.id);
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              {expanded === a.id ? (
-                <>
-                  <p className="article">{a.article || "Loading article..."}</p>
-                  <div className="btn-group">
-                    <button
+              <div className="content">
+                <h2 className="hook">{a.hook || "Loading hook..."}</h2>
+
+                {expanded === a.id ? (
+                  <>
+                    <div className="article-date">
+                      {a.articleDate || formatDate(a.createdAt?.toDate?.() || new Date())}
+                    </div>
+                    <p className="article">{cleanArticle}</p>
+                    <div className="btn-group">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpanded(null);
+                        }}
+                        className="btn-collapse"
+                      >
+                        Collapse
+                      </button>
+                      <a
+                        href={`https://polymarket.com/event/${a.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-bet"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Bet Now
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="teaser">
+                      {cleanArticle
+                        ? cleanArticle.split(" ").slice(0, 60).join(" ") +
+                          (cleanArticle.split(" ").length > 60 ? "…" : "")
+                        : "Loading..."}
+                    </p>
+                    <div
+                      className="readmore-text"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setExpanded(null);
+                        toggleExpand(a.id);
                       }}
-                      className="btn-collapse"
                     >
-                      Collapse
-                    </button>
-                    <a
-                      href={`https://polymarket.com/event/${a.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-bet"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Bet Now
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="teaser">
-                    {a.article
-                      ? a.article.split(" ").slice(0, 60).join(" ") +
-                        (a.article.split(" ").length > 60 ? "…" : "")
-                      : "Loading..."}
-                  </p>
-                  <div className="readmore-text">Read More</div>
-                </>
-              )}
-            </div>
-          </article>
-        ))}
+                      Read More
+                    </div>
+                  </>
+                )}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );
