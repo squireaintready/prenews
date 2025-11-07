@@ -97,7 +97,9 @@ function App() {
                     className="market-icon"
                   />
                   <div
-                    className={`odds-badge ${a.favored?.toLowerCase() || "yes"}`}
+                    className={`odds-badge ${
+                      a.favored?.toLowerCase() || "yes"
+                    }`}
                   >
                     <span className="favored">{a.favored || "Yes"}</span>
                     <span className="odds">{a.odds || "—"}</span>
@@ -123,8 +125,6 @@ function App() {
             </a>
 
             <div className="content">
-              <h2 className="hook">{a.hook || "Loading hook..."}</h2>
-
               {expanded === a.id ? (
                 <>
                   <p className="article">{a.article || "Loading article..."}</p>
@@ -153,8 +153,8 @@ function App() {
                 <>
                   <p className="teaser">
                     {a.article
-                      ? a.article.split(" ").slice(0, 120).join(" ") +
-                        (a.article.split(" ").length > 120 ? "…" : "")
+                      ? a.article.split(" ").slice(0, 60).join(" ") +
+                        (a.article.split(" ").length > 60 ? "…" : "")
                       : "Loading..."}
                   </p>
                   <div

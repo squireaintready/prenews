@@ -1,4 +1,4 @@
-/* src/App.css – FINAL MASTERPIECE (deploy this) */
+/* src/App.css – FINAL PRODUCTION VERSION – NOV 07 2025 01:05 AM EST */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
@@ -55,7 +55,7 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 
 .card {
   background: #111;
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,255,255,0.08);
   transition: all 0.4s ease;
@@ -73,15 +73,15 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 }
 
 .card-header { 
-  padding: 1.5rem; 
-  background: #0d0d0d; 
+  padding: 1.2rem 1.4rem 1rem;
+  background: #0d0d0d;
 }
 .header-row {
   display: grid;
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 1.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 .market-icon {
   width: 76px;
@@ -152,7 +152,7 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   background: #222;
   border-radius: 5px;
   overflow: hidden;
-  margin-top: 0.8rem;
+  margin: 0.6rem 0 0.4rem;
 }
 .prob-bar .fill {
   height: 100%;
@@ -162,35 +162,41 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   box-shadow: 0 0 14px rgba(0, 179, 128, 0.4);
 }
 
-.expire-timer {
-  font-size: 0.8rem;
-  color: #666;
+.market-stats {
+  display: flex;
+  gap: 1.2rem;
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.78rem;
+  color: #aaa;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.market-stats span {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expire-timer-top {
+  font-size: 0.82rem;
+  color: #ff6b6b;
   text-align: right;
-  margin-top: 0.5rem;
-  font-weight: 500;
+  margin: 0.4rem 0 0.6rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 
 .content { 
-  padding: 1.5rem; 
-}
-.hook {
-  font-size: 1.65rem;
-  line-height: 1.35;
-  margin: 0 0 1.2rem;
-  color: #00d4ff;
-  font-weight: 800;
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+  padding: 1rem 1.4rem 1.2rem;
 }
 
 .teaser {
-  line-height: 1.75;
-  margin: 1.3rem 0;
+  line-height: 1.65;
+  margin: 0.4rem 0 0.8rem;
   opacity: 0.92;
-  font-size: 1rem;
+  font-size: 0.98rem;
 }
 .article {
   white-space: pre-wrap;
@@ -201,14 +207,14 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
 
 .readmore-text {
   color: #00b3cc;
-  font-weight: 800;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 0.98rem;
   cursor: pointer;
-  margin-top: 1rem;
   display: inline-block;
+  margin-top: 0.8rem;
 }
-.readmore-text:hover { 
-  text-decoration: underline; 
+.readmore-text:hover {
+  color: #0088a3;
 }
 
 button, .btn-bet {
@@ -253,40 +259,4 @@ button:hover, .btn-bet:hover {
   font-size: 2rem;
   padding: 6rem;
   color: #00b3cc;
-}
-
-.market-stats {
-  display: flex;
-  gap: 1.2rem;
-  margin: 0.8rem 0 0.4rem;
-  font-size: 0.78rem;
-  color: #aaa;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.market-stats span {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.35rem 0.7rem;
-  border-radius: 6px;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.expire-timer {
-  font-size: 0.78rem;
-  color: #666;
-  text-align: right;
-  margin-top: 0.4rem;
-  font-weight: 500;
-}
-
-.expire-timer-top {
-  font-size: 0.68rem;
-  color: #ff6b6b;
-  text-align: right;
-  margin: 0.4rem 0 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
 }
