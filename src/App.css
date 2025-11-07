@@ -1,4 +1,4 @@
-/* src/App.css – FINAL CENTERED CARDS – NOV 07 2025 03:18 AM EST */
+/* src/App.css – FINAL MOBILE OPTIMIZED – NOV 07 2025 03:20 AM EST */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root, .App {
@@ -61,11 +61,11 @@ html, body, #root, .App {
 
 .grid {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  max-width: 1400px;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem; /* LEFT/RIGHT PADDING */
+  padding: 0 1rem;
 }
 
 .card {
@@ -76,57 +76,58 @@ html, body, #root, .App {
   transition: all 0.4s ease;
   border: 1px solid #222;
   cursor: pointer;
+  width: 100%;
+  margin: 0 auto;
 }
 .card:hover { 
-  transform: translateY(-8px); 
-  box-shadow: 0 30px 60px rgba(0,255,255,0.15); 
+  transform: translateY(-6px); 
+  box-shadow: 0 28px 50px rgba(0,255,255,0.16); 
 }
 .card.full { 
-  grid-column: 1/-1; 
   max-width: 900px; 
-  margin: 0 auto; /* CENTERED WHEN FULL */
+  margin: 0 auto; 
 }
 
 .card-header { 
-  padding: 1.2rem 1.4rem 1rem;
+  padding: 1rem 1.2rem 0.8rem;
   background: #0d0d0d;
 }
 .header-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 0.6rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 .market-icon {
-  width: 68px;
-  height: 68px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   background: #000;
   padding: 8px;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 2px solid #333;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .odds-badge {
   background: #000;
   color: #fff;
   font-weight: 900;
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 50px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  min-width: 90px;
+  min-width: 85px;
   border: 2px solid;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 .odds-badge.yes {
   border-color: #00b380;
   background: linear-gradient(135deg, #001f17, #00b38018);
   color: #00e6a3;
-  box-shadow: 0 2px 6px rgba(0, 255, 128, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 179, 128, 0.2);
 }
 .odds-badge.no {
   border-color: #cc0033;
@@ -136,20 +137,20 @@ html, body, #root, .App {
 }
 .favored { 
   display: block; 
-  font-size: 0.88rem; 
+  font-size: 0.82rem; 
   letter-spacing: 1px; 
 }
 .odds { 
   display: block; 
-  font-size: 1.5rem; 
+  font-size: 1.4rem; 
   line-height: 1; 
   margin-top: -3px; 
   font-weight: 900; 
 }
 
 .question {
-  font-size: 1.15rem;
-  line-height: 1.4;
+  font-size: 1.1rem;
+  line-height: 1.35;
   color: #ccc;
   margin: 0;
   word-break: break-word;
@@ -163,54 +164,54 @@ html, body, #root, .App {
 .header-link:hover .card-header { opacity: 0.95; }
 
 .prob-bar {
-  height: 10px;
+  height: 9px;
   background: #222;
   border-radius: 5px;
   overflow: hidden;
-  margin: 0.6rem 0 0.4rem;
+  margin: 0.5rem 0 0.3rem;
 }
 .prob-bar .fill {
   height: 100%;
   background: linear-gradient(90deg, #00b380, #008c66);
   border-radius: 5px;
   transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 0 14px rgba(0, 179, 128, 0.4);
+  box-shadow: 0 0 12px rgba(0, 179, 128, 0.4);
 }
 
 .market-stats {
   display: flex;
-  gap: 1.2rem;
-  margin: 0.4rem 0 0.6rem;
-  font-size: 0.78rem;
+  gap: 1rem;
+  margin: 0.3rem 0 0.5rem;
+  font-size: 0.75rem;
   color: #aaa;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 .market-stats span {
   background: rgba(255, 255, 255, 0.06);
-  padding: 0.35rem 0.7rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 6px;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .expire-timer-top {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #ff6b6b;
   text-align: right;
-  margin: 0.4rem 0 0.6rem;
+  margin: 0.3rem 0 0.5rem;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 
 .content { 
-  padding: 1rem 1.4rem 1.2rem;
+  padding: 0.9rem 1.2rem 1rem;
 }
 
 .hook {
-  font-size: 1.65rem;
-  line-height: 1.35;
-  margin: 0 0 1.2rem;
+  font-size: 1.55rem;
+  line-height: 1.3;
+  margin: 0 0 1rem;
   color: #00d4ff;
   font-weight: 800;
   background: linear-gradient(135deg, #00d4ff, #0099cc);
@@ -220,25 +221,25 @@ html, body, #root, .App {
 }
 
 .teaser {
-  line-height: 1.65;
-  margin: 0.4rem 0 0.8rem;
+  line-height: 1.55;
+  margin: 0.3rem 0 0.7rem;
   opacity: 0.92;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
 .article {
   white-space: pre-wrap;
-  line-height: 1.85;
-  margin: 1.5rem 0;
-  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 1.2rem 0;
+  font-size: 1rem;
 }
 
 .readmore-text {
   color: #00b3cc;
   font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   cursor: pointer;
   display: inline-block;
-  margin-top: 0.8rem;
+  margin-top: 0.7rem;
 }
 .readmore-text:hover {
   color: #0088a3;
@@ -248,11 +249,11 @@ button, .btn-bet {
   background: linear-gradient(135deg, #00f5ff, #ff00c8);
   color: #000;
   border: none;
-  padding: 0.75rem 1.6rem;
+  padding: 0.7rem 1.5rem;
   border-radius: 50px;
   font-weight: 800;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(255, 0, 200, 0.25);
   text-decoration: none;
@@ -265,13 +266,13 @@ button:hover, .btn-bet:hover {
 .btn-collapse { 
   background: #333; 
   color: #aaa; 
-  padding: 0.75rem 1.4rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 1.3rem;
+  font-size: 0.88rem;
 }
 .btn-bet {
   background: linear-gradient(135deg, #00b380, #008c66) !important;
   box-shadow: 0 5px 15px rgba(0, 179, 128, 0.3) !important;
-  padding: 0.75rem 1.6rem;
+  padding: 0.7rem 1.5rem;
 }
 .btn-bet:hover {
   box-shadow: 0 10px 25px rgba(0, 179, 128, 0.45) !important;
@@ -280,7 +281,7 @@ button:hover, .btn-bet:hover {
 .btn-group {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
   justify-content: center;
 }
 
@@ -295,47 +296,39 @@ button:hover, .btn-bet:hover {
 @media (orientation: landscape) and (max-width: 932px) {
   .card-header {
     padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: 0.8rem;
-    min-height: auto;
+    padding-bottom: 0.7rem;
   }
-
   .header-row {
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
-
   .market-icon {
-    width: 48px;
-    height: 48px;
-    padding: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 4px;
   }
-
   .odds-badge {
-    padding: 0.3rem 0.6rem;
-    min-width: 75px;
+    padding: 0.25rem 0.5rem;
+    min-width: 70px;
   }
-  .favored { font-size: 0.7rem; }
-  .odds { font-size: 1.2rem; }
-
+  .favored { font-size: 0.65rem; }
+  .odds { font-size: 1.1rem; }
   .question {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.2;
   }
-
   .prob-bar {
-    height: 8px;
-    margin: 0.4rem 0;
+    height: 7px;
+    margin: 0.3rem 0;
   }
-
   .market-stats {
-    font-size: 0.7rem;
-    gap: 0.8rem;
+    font-size: 0.65rem;
+    gap: 0.7rem;
   }
   .market-stats span {
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.4rem;
   }
-
   .expire-timer-top {
-    font-size: 0.75rem;
-    margin: 0.3rem 0;
+    font-size: 0.7rem;
+    margin: 0.2rem 0;
   }
 }
