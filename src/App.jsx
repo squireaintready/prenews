@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL WORKING SNAP-BACK
+// src/App.jsx — FINAL @sompiUP — NOV 07 2025 03:11 AM EST
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -34,7 +34,6 @@ function App() {
     if (!card) return;
 
     if (expanded === id) {
-      // CAPTURE POSITION BEFORE COLLAPSE
       const rect = card.getBoundingClientRect();
       preCollapseScroll.current[id] = {
         top: window.scrollY + rect.top,
@@ -43,7 +42,6 @@ function App() {
 
       setExpanded(null);
 
-      // RESTORE AFTER COLLAPSE ANIMATION
       setTimeout(() => {
         const saved = preCollapseScroll.current[id];
         if (saved) {

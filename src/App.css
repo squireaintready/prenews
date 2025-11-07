@@ -1,8 +1,21 @@
-/* src/App.css – FINAL PRODUCTION VERSION – NOV 07 2025 02:03 AM EST – @sompiUP – USA */
+/* src/App.css – FINAL PRODUCTION VERSION – NOV 07 2025 03:11 AM EST */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
-.App { min-height: 100vh; padding: 2rem 1rem; }
+html, body, #root, .App {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100vw;
+  overflow-x: hidden;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.App {
+  padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 1rem) 
+          env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem);
+  padding: 2rem 1rem;
+}
 
 .header {
   text-align: center;
@@ -52,6 +65,7 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .card {
@@ -62,7 +76,6 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   transition: all 0.4s ease;
   border: 1px solid #222;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card:hover { 
   transform: translateY(-8px); 
@@ -82,7 +95,7 @@ body { background: #0a0a0a; color: #fff; font-family: 'Inter', -apple-system, Bl
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
   margin-bottom: 0.6rem;
 }
 .market-icon {
@@ -242,7 +255,7 @@ button, .btn-bet {
   font-size: 0.95rem;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(255, 0, 200, 0.25);
-  text-decoration: none;
+  text-decoration: no;
   display: inline-block;
 }
 button:hover, .btn-bet:hover {
@@ -276,4 +289,53 @@ button:hover, .btn-bet:hover {
   font-size: 2rem;
   padding: 6rem;
   color: #00b3cc;
+}
+
+/* MOBILE LANDSCAPE FIX — NO CLIPPING */
+@media (orientation: landscape) and (max-width: 932px) {
+  .card-header {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: 0.8rem;
+    min-height: auto;
+  }
+
+  .header-row {
+    gap: 0.6rem;
+  }
+
+  .market-icon {
+    width: 48px;
+    height: 48px;
+    padding: 5px;
+  }
+
+  .odds-badge {
+    padding: 0.3rem 0.6rem;
+    min-width: 75px;
+  }
+  .favored { font-size: 0.7rem; }
+  .odds { font-size: 1.2rem; }
+
+  .question {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .prob-bar {
+    height: 8px;
+    margin: 0.4rem 0;
+  }
+
+  .market-stats {
+    font-size: 0.7rem;
+    gap: 0.8rem;
+  }
+  .market-stats span {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .expire-timer-top {
+    font-size: 0.75rem;
+    margin: 0.3rem 0;
+  }
 }
