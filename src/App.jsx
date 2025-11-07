@@ -1,23 +1,23 @@
 // src/App.jsx – FIXED EXPAND + TITLE CHANGE
-import { useState, useEffect, useRef } from 'react';
-import { db } from './firebase';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import './App.css';
+import { useState, useEffect, useRef } from "react";
+import { db } from "./firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import "./App.css";
 
 function App() {
   const [active, setActive] = useState([]);
   const [expired, setExpired] = useState([]);
-  const [tab, setTab] = useState('active');
+  const [tab, setTab] = useState("active");
   const [expanded, setExpanded] = useState(null);
   const cardRefs = useRef({});
 
   useEffect(() => {
-    const q = query(collection(db, 'articles'), orderBy('volume24hr', 'desc'));
+    const q = query(collection(db, "articles"), orderBy("volume24hr", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
       const now = Date.now();
       const act = [];
       const exp = [];
-      snapshot.docs.forEach(doc => {
+      snapshot.docs.forEach((doc) => {
         const data = { id: doc.id, ...doc.data() };
         if (data.endDate && new Date(data.endDate) < now) exp.push(data);
         else act.push(data);
@@ -30,17 +30,24 @@ function App() {
 
   const expandAndSnap = (id) => {
     setExpanded(id);
-    setTimeout(() => cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+    setTimeout(
+      () =>
+        cardRefs.current[id]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        }),
+      50
+    );
   };
 
   const handleCardClick = (e) => {
-    if (e.target.closest('a, button')) return;
+    if (e.target.closest("a, button")) return;
     const card = e.currentTarget;
     const id = card.dataset.id;
     expandAndSnap(id);
   };
 
-  const articles = tab === 'active' ? active : expired;
+  const articles = tab === "active" ? active : expired;
 
   if (articles.length === 0) return <div className="loading">Loading...</div>;
 
@@ -52,35 +59,59 @@ function App() {
       </header>
 
       <div className="tabs">
-        <button onClick={() => setTab('active')} className={tab === 'active' ? 'active' : ''}>
+        <button
+          onClick={() => setTab("active")}
+          className={tab === "active" ? "active" : ""}
+        >
           Active ({active.length})
         </button>
-        <button onClick={() => setTab('expired')} className={tab === 'expired' ? 'active' : ''}>
+        <button
+          onClick={() => setTab("expired")}
+          className={tab === "expired" ? "active" : ""}
+        >
           Past ({expired.length})
         </button>
       </div>
 
       <div className="grid">
-        {articles.map(a => (
+        {articles.map((a) => (
           <article
             key={a.id}
             data-id={a.id}
-            ref={el => cardRefs.current[a.id] = el}
-            className={`card ${expanded === a.id ? 'full' : ''}`}
+            ref={(el) => (cardRefs.current[a.id] = el)}
+            className={`card ${expanded === a.id ? "full" : ""}`}
             onClick={handleCardClick}
           >
-            <a href={`https://polymarket.com/event/${a.slug}`} target="_blank" rel="noopener noreferrer" className="header-link" onClick={e => e.stopPropagation()}>
+            <a
+              href={`https://polymarket.com/event/${a.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="header-link"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="card-header">
                 <div className="header-row">
-                  <img src={a.image || '/placeholder.png'} alt="" className="market-icon" />
-                  <div className={`odds-badge ${a.favored.toLowerCase()}`}>
-                    <span className="favored">{a.favored}</span>
+                  <img
+                    src={a.image || "/placeholder.png"}
+                    alt=""
+                    className="market-icon"
+                  />
+                  <div
+                    className={`odds-badge ${
+                      a.favored?.toLowerCase() || "yes"
+                    }`}
+                  >
+                    <span className="favored">{a.favored || "Yes"}</span>
                     <span className="odds">{a.odds}</span>
                   </div>
                   <h3 className="question">{a.title}</h3>
                 </div>
-                <div className="prob-bar"><div className="fill" style={{ width: a.odds }} /></div>
-                <div className="expire-timer">{a.endDate && formatDate(a.endDate)}</div>
+                <div className="prob-bar">
+                  <div className="fill" style={{ width: a.odds }} />
+                </div>
+                <div className="expire-timer">
+                  {a.endDate && formatDate(a.endDate)}
+                </div>
               </div>
             </a>
 
@@ -91,16 +122,39 @@ function App() {
                 <>
                   <p className="article">{a.article}</p>
                   <div className="btn-group">
-                    <button onClick={e => { e.stopPropagation(); setExpanded(null); }} className="btn-collapse">Collapse</button>
-                    <a href={`https://polymarket.com/event/${a.slug}`} target="_blank" rel="noopener noreferrer" className="btn-bet" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpanded(null);
+                      }}
+                      className="btn-collapse"
+                    >
+                      Collapse
+                    </button>
+                    <a
+                      href={`https://polymarket.com/event/${a.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-bet"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       Bet Now
                     </a>
                   </div>
                 </>
               ) : (
                 <>
-                  <p className="teaser">{a.article.split(' ').slice(0, 120).join(' ')}{a.article.split(' ').length > 120 && '…'}</p>
-                  <div className="readmore-text" onClick={e => { e.stopPropagation(); expandAndSnap(a.id); }}>
+                  <p className="teaser">
+                    {a.article.split(" ").slice(0, 120).join(" ")}
+                    {a.article.split(" ").length > 120 && "…"}
+                  </p>
+                  <div
+                    className="readmore-text"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      expandAndSnap(a.id);
+                    }}
+                  >
                     Read More
                   </div>
                 </>
@@ -123,7 +177,7 @@ const formatDate = (dateStr) => {
   if (diffDays > 0) return `Expires in ${diffDays}d`;
   if (diffHours > 0) return `Expires in ${diffHours}h`;
   if (diffMins > 0) return `Expires in ${diffMins}m`;
-  return 'Expiring now';
+  return "Expiring now";
 };
 
 export default App;
