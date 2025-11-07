@@ -1,84 +1,98 @@
 // backend/generate.js
-require("dotenv").config();
-const axios = require("axios");
-const admin = require("firebase-admin");
+require('dotenv').config();
+const axios = require('axios');
+const admin = require('firebase-admin');
 
-// GET CREDENTIALS FROM ENV VAR (GitHub Secret)
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
-
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount)
 });
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
-
-const LIMIT = 50;
+const LIMIT = 10;
 
 (async () => {
   try {
     const { data } = await axios.get(
-      "https://gamma-api.polymarket.com/public-search?q=q&sort=volume24hr&keep_closed_markets=1&limit_per_type=50&events_status=active&cache=true&optimized=true"
+      'https://gamma-api.polymarket.com/public-search?q=q&sort=volume24hr&keep_closed_markets=1&limit_per_type=50&events_status=active&cache=true&optimized=true'
     );
 
-    const marketsToProcess = data.events.slice(0, LIMIT);
-    console.log(`Processing ${marketsToProcess.length} markets`);
+    console.log(`Fetched ${data.events?.length || 0} events`);
 
-    for (const e of marketsToProcess) {
-      const docRef = db.collection("articles").doc(e.id);
-      if (await docRef.get().then((d) => d.exists)) {
-        console.log("Already exists:", e.title);
+    for (const e of (data.events || []).slice(0, LIMIT)) {
+      // BASIC SAFETY
+      if (!e.id || !e.markets?.[0]) {
+        console.log('SKIP: bad event structure');
         continue;
       }
 
-      const market = e.markets[0];
+      const m = e.markets[0];
 
-      const prices = market.outcomePrices.map((p) => {
-        const n = parseFloat(p);
-        return isNaN(n) ? 0 : n; // NaN → 0 so it never wins
-      });
+      // PRICE & OUTCOME VALIDATION
+      if (!Array.isArray(m.outcomePrices) || !Array.isArray(m.outcomes)) {
+        console.log('SKIP: missing prices/outcomes', e.title);
+        continue;
+      }
 
-      const maxPrice = Math.max(...prices);
-      const maxIdx = prices.indexOf(maxPrice);
-      const favored = market.outcomes[maxIdx];
-      const odds = maxPrice > 0 ? `${maxPrice.toFixed(0)}%` : "";
+      const prices = m.outcomePrices
+        .map(p => parseFloat(p))
+        .filter(n => !isNaN(n));
 
-      console.log(`${raceName}: ${favored} | ${odds || "No odds"}`);
+      if (prices.length === 0) {
+        console.log('SKIP: no valid prices', e.title);
+        continue;
+      }
+
+      const maxIdx = prices.indexOf(Math.max(...prices));
+      if (!m.outcomes[maxIdx]) {
+        console.log('SKIP: no outcome for highest price', e.title);
+        continue;
+      }
+
+      const docRef = db.collection('articles').doc(e.id);
+      if (await docRef.get().then(d => d.exists)) {
+        console.log('Already exists:', e.title);
+        continue;
+      }
+
+      const favored = m.outcomes[maxIdx];
+      const odds = (prices[maxIdx] * 100).toFixed(0) + '%';
+
       const prompt = `Joe Rogan voice, viral news post about: "${e.title}"
-      Favored: ${favored} at ${odds}
-      Give me:
-      1. One-line hook (no quotes)
-      2. 150-word article – intense, curious, conversational
-      Today: November 06, 2025`;
+Favored: ${favored} at ${odds}
+Give me:
+1. One-line hook (no quotes)
+2. 150-word article – intense, curious, conversational
+Today: November 06, 2025`;
 
       const res = await axios.post(GEMINI_URL, {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
       });
 
-      const [hook, ...body] =
-        res.data.candidates[0].content.parts[0].text.split("\n\n");
+      const [hook, ...body] = res.data.candidates[0].content.parts[0].text.split('\n\n');
 
       await docRef.set({
         id: e.id,
         title: e.title,
         slug: e.slug,
-        image: e.image || "",
+        image: e.image || '',
         hook: hook.trim(),
-        article: body.join("\n\n").trim(),
+        article: body.join('\n\n').trim(),
         favored,
         odds,
         volume24hr: e.volume24hr || 0,
         endDate: e.endDate,
-        createdAt: new Date(),
+        createdAt: new Date()
       });
 
-      console.log("ADDED:", e.title, "|", favored, odds);
+      console.log('ADDED:', e.title, '|', favored, odds);
     }
 
-    console.log("FINISHED – All done");
+    console.log('FINISHED – All clean');
   } catch (err) {
-    console.error("FATAL:", err.response?.data || err.message);
+    console.error('FATAL:', err.response?.data || err.message);
   }
 })();
