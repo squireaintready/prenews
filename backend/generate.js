@@ -1,17 +1,17 @@
-// backend/generate.js — FINAL @sompiUP — NOV 06 2025 11:50 PM EST
-require('dotenv').config();
-const axios = require('axios');
-const admin = require('firebase-admin');
+// backend/generate.js — FINAL @sompiUP — NOV 07 2025 12:30 AM EST
+require("dotenv").config();
+const axios = require("axios");
+const admin = require("firebase-admin");
 
 let serviceAccount;
 if (process.env.FIREBASE_ADMIN_SDK) {
   serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 } else {
-  serviceAccount = require('./adminsdk.json');
+  serviceAccount = require("./adminsdk.json");
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
@@ -21,8 +21,11 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2
 const LIMIT = 50;
 
 (async () => {
-  console.log('PREDICTION PULSE — @sompiUP — USA');
-  console.log('Time:', new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  console.log("PREDICTION PULSE — @sompiUP — USA");
+  console.log(
+    "Time:",
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+  );
 
   try {
     const { data } = await axios.get(
@@ -30,7 +33,7 @@ const LIMIT = 50;
     );
 
     if (!data.events?.length) {
-      console.log('No events');
+      console.log("No events");
       return;
     }
 
@@ -42,24 +45,50 @@ const LIMIT = 50;
       if (!e.id || !e.markets?.[0]) continue;
 
       const m = e.markets[0];
-      const prices = (m.outcomePrices || []).map(p => parseFloat(p)).filter(n => !isNaN(n));
+      const prices = (m.outcomePrices || [])
+        .map((p) => parseFloat(p))
+        .filter((n) => !isNaN(n));
       if (prices.length === 0) continue;
 
       const maxIdx = prices.indexOf(Math.max(...prices));
-      const favored = m.outcomes[maxIdx] || 'Yes';
-      const odds = (prices[maxIdx] * 100).toFixed(0) + '%';
+      const favored = m.outcomes[maxIdx] || "Yes";
+      const odds = (prices[maxIdx] * 100).toFixed(0) + "%";
 
-      const docRef = db.collection('articles').doc(e.id);
-      if (await docRef.get().then(d => d.exists)) {
-        console.log('EXISTS:', e.title);
+      const docRef = db.collection("articles").doc(e.id);
+      if (await docRef.get().then((d) => d.exists)) {
+        console.log("EXISTS:", e.title);
         continue;
       }
 
-      const today = new Date().toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'America/New_York'
+      let volume = e.volume || 0;
+      let liquidity = 0;
+      let openInterest = 0;
+      try {
+        const eventRes = await axios.get(
+          `https://gamma-api.polymarket.com/events/${e.id}`
+        );
+        const full = eventRes.data;
+
+        // YOUR EXACT ORDER — RESPECTED
+        volume =
+          full.volume ||
+          full.volume1yr ||
+          full.volume1mo ||
+          full.volume1wk ||
+          full.volume24hr ||
+          volume;
+        liquidity =
+          full.liquidity || full.liquidityNum || full.liquidityClob || 0;
+        openInterest = full.openInterest || 0;
+      } catch (err) {
+        console.log("EVENT API FAILED");
+      }
+
+      const today = new Date().toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "America/New_York",
       });
 
       const prompt = `You are a senior market analyst guest on JRE.
@@ -85,21 +114,21 @@ Pure signal. Date: ${today}`;
 
       try {
         const res = await axios.post(GEMINI_URL, {
-          contents: [{ role: "user", parts: [{ text: prompt }] }]
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
         });
 
         const candidate = res.data.candidates?.[0];
         if (candidate?.functionCall) {
-          console.log('BLOCKED: functionCall');
+          console.log("BLOCKED: functionCall");
           continue;
         }
 
         let rawText = candidate?.content?.parts?.[0]?.text || "No response.";
 
         rawText = rawText
-          .replace(/raceName.*/gi, '')
-          .replace(/```[\s\S]*?```/g, '')
-          .replace(/^\s*[\r\n]/gm, '')
+          .replace(/raceName.*/gi, "")
+          .replace(/```[\s\S]*?```/g, "")
+          .replace(/^\s*[\r\n]/gm, "")
           .trim();
 
         const splitIndex = rawText.search(/\n\s*2[\.\)\-]\s/i);
@@ -110,29 +139,15 @@ Pure signal. Date: ${today}`;
           hook = rawText.substring(0, splitIndex).trim();
           article = rawText.substring(splitIndex).trim();
         } else {
-          hook = rawText.split('\n')[0] || hook;
+          hook = rawText.split("\n")[0] || hook;
           article = rawText;
-        }
-
-        // STILL STORE volume/liquidity/openInterest — just not in prompt
-        let volume = e.volume || 0;
-        let liquidity = 0;
-        let openInterest = 0;
-        try {
-          const eventRes = await axios.get(`https://gamma-api.polymarket.com/events/${e.id}`);
-          const full = eventRes.data;
-          volume = full.volume || volume;
-          liquidity = full.liquidity || 0;
-          openInterest = full.openInterest || 0;
-        } catch (err) {
-          console.log('EVENT API FAILED');
         }
 
         await docRef.set({
           id: e.id,
           title: e.title,
           slug: e.slug,
-          image: e.image || '',
+          image: e.image || "",
           hook: hook.trim(),
           article: article.trim(),
           favored,
@@ -142,7 +157,7 @@ Pure signal. Date: ${today}`;
           openInterest,
           endDate: e.endDate,
           createdAt: new Date(),
-          articleDate: today
+          articleDate: today,
         });
 
         console.log(`ADDED: ${e.title}`);
@@ -150,14 +165,13 @@ Pure signal. Date: ${today}`;
         console.log(`   Date: ${today}`);
         added++;
       } catch (err) {
-        console.log('GEMINI FAILED:', e.title);
+        console.log("GEMINI FAILED:", e.title);
       }
     }
 
     console.log(`\nFINISHED — ${added} NEW ARTICLES`);
     console.log(`@sompiUP — https://prenews.vercel.app`);
-
   } catch (err) {
-    console.error('FATAL:', err.response?.data || err.message);
+    console.error("FATAL:", err.response?.data || err.message);
   }
 })();
