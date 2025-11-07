@@ -124,7 +124,16 @@ function App() {
               </div>
             </a>
 
-            <div className="content">
+            {/* Collapsible content — click anywhere to expand/collapse */}
+            <div
+              className="content"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (expanded === a.id) setExpanded(null);
+                else expandAndSnap(a.id);
+              }}
+              style={{ cursor: "pointer" }}
+            >
               {expanded === a.id ? (
                 <>
                   <p className="article">{a.article || "Loading article..."}</p>
@@ -157,15 +166,7 @@ function App() {
                         (a.article.split(" ").length > 60 ? "…" : "")
                       : "Loading..."}
                   </p>
-                  <div
-                    className="readmore-text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      expandAndSnap(a.id);
-                    }}
-                  >
-                    Read More
-                  </div>
+                  <div className="readmore-text">Read More</div>
                 </>
               )}
             </div>
