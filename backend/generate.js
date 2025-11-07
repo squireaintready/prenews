@@ -88,7 +88,7 @@ Open interest: $${openInterest.toLocaleString()}
 
 Structure:
 1. 11-word headline hook ending in ? … or !
-2. 250-word dispatch covering:
+2. 200-word dispatch covering:
    - Current pricing and momentum
    - Three key drivers moving the market today
    - One material risk traders are pricing in
