@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL @sompiUP — NOV 07 2025 01:58 AM EST
+// src/App.jsx — FINAL WORKING SNAP-BACK
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -10,6 +10,7 @@ function App() {
   const [tab, setTab] = useState("active");
   const [expanded, setExpanded] = useState(null);
   const cardRefs = useRef({});
+  const preCollapseScroll = useRef({});
 
   useEffect(() => {
     const q = query(collection(db, "articles"), orderBy("volume24hr", "desc"));
@@ -29,18 +30,33 @@ function App() {
   }, []);
 
   const toggleExpand = (id) => {
+    const card = cardRefs.current[id];
+    if (!card) return;
+
     if (expanded === id) {
+      // CAPTURE POSITION BEFORE COLLAPSE
+      const rect = card.getBoundingClientRect();
+      preCollapseScroll.current[id] = {
+        top: window.scrollY + rect.top,
+        height: rect.height
+      };
+
       setExpanded(null);
+
+      // RESTORE AFTER COLLAPSE ANIMATION
+      setTimeout(() => {
+        const saved = preCollapseScroll.current[id];
+        if (saved) {
+          const targetY = saved.top - (window.innerHeight / 2) + (saved.height / 2);
+          window.scrollTo({ top: targetY, behavior: "smooth" });
+          delete preCollapseScroll.current[id];
+        }
+      }, 450);
     } else {
       setExpanded(id);
-      setTimeout(
-        () =>
-          cardRefs.current[id]?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          }),
-        50
-      );
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
     }
   };
 
@@ -107,13 +123,13 @@ function App() {
                       alt=""
                       className="market-icon"
                     />
+                    <h3 className="question">{a.title || "Loading..."}</h3>
                     <div
                       className={`odds-badge ${a.favored?.toLowerCase() || "yes"}`}
                     >
                       <span className="favored">{a.favored || "Yes"}</span>
                       <span className="odds">{a.odds || "—"}</span>
                     </div>
-                    <h3 className="question">{a.title || "Loading..."}</h3>
                   </div>
 
                   <div className="prob-bar">
@@ -145,7 +161,7 @@ function App() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setExpanded(null);
+                          toggleExpand(a.id);
                         }}
                         className="btn-collapse"
                       >
