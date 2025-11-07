@@ -1,4 +1,4 @@
-/* src/App.css – FINAL PRODUCTION VERSION – NOV 07 2025 03:11 AM EST */
+/* src/App.css – FINAL CENTERED CARDS – NOV 07 2025 03:18 AM EST */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root, .App {
@@ -65,7 +65,7 @@ html, body, #root, .App {
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1rem; /* LEFT/RIGHT PADDING */
 }
 
 .card {
@@ -84,7 +84,7 @@ html, body, #root, .App {
 .card.full { 
   grid-column: 1/-1; 
   max-width: 900px; 
-  margin: 0 auto; 
+  margin: 0 auto; /* CENTERED WHEN FULL */
 }
 
 .card-header { 
@@ -126,7 +126,7 @@ html, body, #root, .App {
   border-color: #00b380;
   background: linear-gradient(135deg, #001f17, #00b38018);
   color: #00e6a3;
-  box-shadow: 0 2px 6px rgba(0, 179, 128, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 255, 128, 0.2);
 }
 .odds-badge.no {
   border-color: #cc0033;
@@ -255,7 +255,7 @@ button, .btn-bet {
   font-size: 0.95rem;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(255, 0, 200, 0.25);
-  text-decoration: no;
+  text-decoration: none;
   display: inline-block;
 }
 button:hover, .btn-bet:hover {
