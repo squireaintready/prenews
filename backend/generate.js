@@ -18,7 +18,7 @@ const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
-const LIMIT = 60;
+const LIMIT = 50;
 
 (async () => {
   console.log('PREDICTION PULSE — @sompiUP — USA');
