@@ -1,31 +1,28 @@
-// backend/generate.js — FINAL @sompiUP — NOV 06 2025 10:15 PM EST
-require("dotenv").config();
-const axios = require("axios");
-const admin = require("firebase-admin");
+// backend/generate.js — FINAL @sompiUP — NOV 06 2025 11:50 PM EST
+require('dotenv').config();
+const axios = require('axios');
+const admin = require('firebase-admin');
 
 let serviceAccount;
 if (process.env.FIREBASE_ADMIN_SDK) {
   serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 } else {
-  serviceAccount = require("./adminsdk.json");
+  serviceAccount = require('./adminsdk.json');
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount)
 });
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
-const LIMIT = 25;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
+const LIMIT = 60;
 
 (async () => {
-  console.log("PREDICTION PULSE — @sompiUP — USA");
-  console.log(
-    "Time:",
-    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
-  );
+  console.log('PREDICTION PULSE — @sompiUP — USA');
+  console.log('Time:', new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
 
   try {
     const { data } = await axios.get(
@@ -33,7 +30,7 @@ const LIMIT = 25;
     );
 
     if (!data.events?.length) {
-      console.log("No events");
+      console.log('No events');
       return;
     }
 
@@ -45,89 +42,64 @@ const LIMIT = 25;
       if (!e.id || !e.markets?.[0]) continue;
 
       const m = e.markets[0];
-      const prices = (m.outcomePrices || [])
-        .map((p) => parseFloat(p))
-        .filter((n) => !isNaN(n));
+      const prices = (m.outcomePrices || []).map(p => parseFloat(p)).filter(n => !isNaN(n));
       if (prices.length === 0) continue;
 
       const maxIdx = prices.indexOf(Math.max(...prices));
-      const favored = m.outcomes[maxIdx] || "Yes";
-      const odds = (prices[maxIdx] * 100).toFixed(0) + "%";
+      const favored = m.outcomes[maxIdx] || 'Yes';
+      const odds = (prices[maxIdx] * 100).toFixed(0) + '%';
 
-      const docRef = db.collection("articles").doc(e.id);
-      if (await docRef.get().then((d) => d.exists)) {
-        console.log("EXISTS:", e.title);
+      const docRef = db.collection('articles').doc(e.id);
+      if (await docRef.get().then(d => d.exists)) {
+        console.log('EXISTS:', e.title);
         continue;
       }
 
-      // FULL EVENT DATA
-      let volume = e.volume || 0;
-      let liquidity = 0;
-      let openInterest = 0;
-      try {
-        const eventRes = await axios.get(
-          `https://gamma-api.polymarket.com/events/${e.id}`
-        );
-        const full = eventRes.data;
-        volume = full.volume || volume;
-        liquidity = full.liquidity || 0;
-        openInterest = full.openInterest || 0;
-      } catch (err) {
-        console.log("EVENT API FAILED");
-      }
+      const today = new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'America/New_York'
+      });
 
       const prompt = `You are a senior market analyst guest on JRE.
 
-Write in third-person, professional tone with subtle Joe Rogan curiosity.
+Write in third-person, surgical tone. Zero opinion.
 
 Event: "${e.title}"
-Market favorite: ${favored} at ${odds}
-24h volume: $${volume.toLocaleString()}
-Liquidity: $${liquidity.toLocaleString()}
-Open interest: $${openInterest.toLocaleString()}
+Market: ${favored} at ${odds}
 
 Structure:
-1. 11-word headline hook ending in ? … or !
-2. 200-word dispatch covering:
-   - Current pricing and momentum
-   - Three key drivers moving the market today
-   - One material risk traders are pricing in
-   - Closing assessment of where the smart money sits
+1. 11-word headline hook ending in ? … or ! — witty, unexpected, viral-ready
+2. 150-word dispatch of:
+   - Hard facts only, including other relevant hard facts (think hard about connections)
+   - Key drivers/factors moving the market
+   - Viral signals that actually matter (tweets, memes, headlines that moved money)
+   - Clever second-order effects most miss
+   - Hidden connections, behavioral tells, structural edges
+   - Only if it's meaningful AND not obvious
 
-No predictions, no advice, no first-person, no markdown, no hashtags.
+No first-person. No markdown. No hashtags. No filler.
 
-Pure analytical observation. Date: November 06, 2025`;
+Pure signal. Date: ${today}`;
 
       try {
         const res = await axios.post(GEMINI_URL, {
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_NONE",
-            },
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_NONE",
-            },
-          ],
+          contents: [{ role: "user", parts: [{ text: prompt }] }]
         });
 
         const candidate = res.data.candidates?.[0];
         if (candidate?.functionCall) {
-          console.log("BLOCKED: functionCall");
+          console.log('BLOCKED: functionCall');
           continue;
         }
 
         let rawText = candidate?.content?.parts?.[0]?.text || "No response.";
 
-        // KILL ALL SYMBOLS
         rawText = rawText
-          .replace(/[*#]/g, "")
-          .replace(/```[\s\S]*?```/g, "")
-          .replace(/^\s*[\r\n]/gm, "")
+          .replace(/raceName.*/gi, '')
+          .replace(/```[\s\S]*?```/g, '')
+          .replace(/^\s*[\r\n]/gm, '')
           .trim();
 
         const splitIndex = rawText.search(/\n\s*2[\.\)\-]\s/i);
@@ -138,15 +110,29 @@ Pure analytical observation. Date: November 06, 2025`;
           hook = rawText.substring(0, splitIndex).trim();
           article = rawText.substring(splitIndex).trim();
         } else {
-          hook = rawText.split("\n")[0] || hook;
+          hook = rawText.split('\n')[0] || hook;
           article = rawText;
+        }
+
+        // STILL STORE volume/liquidity/openInterest — just not in prompt
+        let volume = e.volume || 0;
+        let liquidity = 0;
+        let openInterest = 0;
+        try {
+          const eventRes = await axios.get(`https://gamma-api.polymarket.com/events/${e.id}`);
+          const full = eventRes.data;
+          volume = full.volume || volume;
+          liquidity = full.liquidity || 0;
+          openInterest = full.openInterest || 0;
+        } catch (err) {
+          console.log('EVENT API FAILED');
         }
 
         await docRef.set({
           id: e.id,
           title: e.title,
           slug: e.slug,
-          image: e.image || "",
+          image: e.image || '',
           hook: hook.trim(),
           article: article.trim(),
           favored,
@@ -156,22 +142,22 @@ Pure analytical observation. Date: November 06, 2025`;
           openInterest,
           endDate: e.endDate,
           createdAt: new Date(),
+          articleDate: today
         });
 
         console.log(`ADDED: ${e.title}`);
         console.log(`   Hook: "${hook}"`);
-        console.log(`   Volume: $${volume.toLocaleString()}`);
-        console.log(`   Liquidity: $${liquidity.toLocaleString()}`);
-        console.log(`   Open Interest: $${openInterest.toLocaleString()}`);
+        console.log(`   Date: ${today}`);
         added++;
       } catch (err) {
-        console.log("GEMINI FAILED:", e.title);
+        console.log('GEMINI FAILED:', e.title);
       }
     }
 
     console.log(`\nFINISHED — ${added} NEW ARTICLES`);
     console.log(`@sompiUP — https://prenews.vercel.app`);
+
   } catch (err) {
-    console.error("FATAL:", err.response?.data || err.message);
+    console.error('FATAL:', err.response?.data || err.message);
   }
 })();
