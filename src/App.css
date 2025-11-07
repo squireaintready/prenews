@@ -1,4 +1,4 @@
-/* src/App.css – FINAL MOBILE OPTIMIZED – NOV 07 2025 03:20 AM EST */
+/* src/App.css – FINAL MOBILE FULL SCREEN CARD – NOV 07 2025 03:25 AM EST */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root, .App {
@@ -61,9 +61,9 @@ html, body, #root, .App {
 
 .grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: 1fr;
-  max-width: 100%;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -76,51 +76,51 @@ html, body, #root, .App {
   transition: all 0.4s ease;
   border: 1px solid #222;
   cursor: pointer;
-  width: 100%;
-  margin: 0 auto;
+  padding: 1.2rem; /* MORE PADDING */
 }
 .card:hover { 
-  transform: translateY(-6px); 
-  box-shadow: 0 28px 50px rgba(0,255,255,0.16); 
+  transform: translateY(-8px); 
+  box-shadow: 0 30px 60px rgba(0,255,255,0.15); 
 }
 .card.full { 
+  grid-column: 1/-1; 
   max-width: 900px; 
   margin: 0 auto; 
 }
 
 .card-header { 
-  padding: 1rem 1.2rem 0.8rem;
+  padding: 0; /* NO EXTRA PADDING — use .card padding */
   background: #0d0d0d;
 }
 .header-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  gap: 1.2rem;
+  margin-bottom: 0.6rem;
 }
 .market-icon {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   object-fit: contain;
   background: #000;
   padding: 8px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 2px solid #333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 .odds-badge {
   background: #000;
   color: #fff;
   font-weight: 900;
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 50px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  min-width: 85px;
+  min-width: 90px;
   border: 2px solid;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   transition: all 0.3s ease;
 }
 .odds-badge.yes {
@@ -137,20 +137,20 @@ html, body, #root, .App {
 }
 .favored { 
   display: block; 
-  font-size: 0.82rem; 
+  font-size: 0.88rem; 
   letter-spacing: 1px; 
 }
 .odds { 
   display: block; 
-  font-size: 1.4rem; 
+  font-size: 1.5rem; 
   line-height: 1; 
   margin-top: -3px; 
   font-weight: 900; 
 }
 
 .question {
-  font-size: 1.1rem;
-  line-height: 1.35;
+  font-size: 1.15rem;
+  line-height: 1.4;
   color: #ccc;
   margin: 0;
   word-break: break-word;
@@ -164,54 +164,54 @@ html, body, #root, .App {
 .header-link:hover .card-header { opacity: 0.95; }
 
 .prob-bar {
-  height: 9px;
+  height: 10px;
   background: #222;
   border-radius: 5px;
   overflow: hidden;
-  margin: 0.5rem 0 0.3rem;
+  margin: 0.6rem 0 0.4rem;
 }
 .prob-bar .fill {
   height: 100%;
   background: linear-gradient(90deg, #00b380, #008c66);
   border-radius: 5px;
   transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 0 12px rgba(0, 179, 128, 0.4);
+  box-shadow: 0 0 14px rgba(0, 179, 128, 0.4);
 }
 
 .market-stats {
   display: flex;
-  gap: 1rem;
-  margin: 0.3rem 0 0.5rem;
-  font-size: 0.75rem;
+  gap: 1.2rem;
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.78rem;
   color: #aaa;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 .market-stats span {
   background: rgba(255, 255, 255, 0.06);
-  padding: 0.3rem 0.6rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 6px;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .expire-timer-top {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: #ff6b6b;
   text-align: right;
-  margin: 0.3rem 0 0.5rem;
+  margin: 0.4rem 0 0.6rem;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 
 .content { 
-  padding: 0.9rem 1.2rem 1rem;
+  padding: 0; /* NO EXTRA PADDING — use .card padding */
 }
 
 .hook {
-  font-size: 1.55rem;
-  line-height: 1.3;
-  margin: 0 0 1rem;
+  font-size: 1.65rem;
+  line-height: 1.35;
+  margin: 0 0 1.2rem;
   color: #00d4ff;
   font-weight: 800;
   background: linear-gradient(135deg, #00d4ff, #0099cc);
@@ -221,25 +221,25 @@ html, body, #root, .App {
 }
 
 .teaser {
-  line-height: 1.55;
-  margin: 0.3rem 0 0.7rem;
+  line-height: 1.65;
+  margin: 0.4rem 0 0.8rem;
   opacity: 0.92;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
 }
 .article {
   white-space: pre-wrap;
-  line-height: 1.7;
-  margin: 1.2rem 0;
-  font-size: 1rem;
+  line-height: 1.85;
+  margin: 1.5rem 0;
+  font-size: 1.05rem;
 }
 
 .readmore-text {
   color: #00b3cc;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   cursor: pointer;
   display: inline-block;
-  margin-top: 0.7rem;
+  margin-top: 0.8rem;
 }
 .readmore-text:hover {
   color: #0088a3;
@@ -249,11 +249,11 @@ button, .btn-bet {
   background: linear-gradient(135deg, #00f5ff, #ff00c8);
   color: #000;
   border: none;
-  padding: 0.7rem 1.5rem;
+  padding: 0.75rem 1.6rem;
   border-radius: 50px;
   font-weight: 800;
   cursor: pointer;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(255, 0, 200, 0.25);
   text-decoration: none;
@@ -266,13 +266,13 @@ button:hover, .btn-bet:hover {
 .btn-collapse { 
   background: #333; 
   color: #aaa; 
-  padding: 0.7rem 1.3rem;
-  font-size: 0.88rem;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
 }
 .btn-bet {
   background: linear-gradient(135deg, #00b380, #008c66) !important;
   box-shadow: 0 5px 15px rgba(0, 179, 128, 0.3) !important;
-  padding: 0.7rem 1.5rem;
+  padding: 0.75rem 1.6rem;
 }
 .btn-bet:hover {
   box-shadow: 0 10px 25px rgba(0, 179, 128, 0.45) !important;
@@ -281,7 +281,7 @@ button:hover, .btn-bet:hover {
 .btn-group {
   display: flex;
   gap: 1rem;
-  margin-top: 1.2rem;
+  margin-top: 1.5rem;
   justify-content: center;
 }
 
@@ -292,43 +292,103 @@ button:hover, .btn-bet:hover {
   color: #00b3cc;
 }
 
-/* MOBILE LANDSCAPE FIX — NO CLIPPING */
-@media (orientation: landscape) and (max-width: 932px) {
-  .card-header {
-    padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: 0.7rem;
+/* MOBILE ONLY: FULL SCREEN CARD */
+@media (max-width: 768px) {
+  .App {
+  padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 1rem) 
+          env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem);
+  padding: 1rem 0rem;
+}
+
+  .grid {
+    padding: 0;
+    gap: 1.5rem;
+    width: 100vw;
   }
+
+  .card {
+    margin: 0;
+    width: 100vw;
+    border-radius: 0;
+    padding: 1.4rem;
+  }
+
+  .card-header, .content {
+    padding: 0;
+  }
+
   .header-row {
-    gap: 0.5rem;
+    gap: 1rem;
   }
+
   .market-icon {
-    width: 44px;
-    height: 44px;
-    padding: 4px;
+    width: 64px;
+    height: 64px;
+    padding: 7px;
   }
+
   .odds-badge {
-    padding: 0.25rem 0.5rem;
-    min-width: 70px;
+    padding: 0.35rem 0.7rem;
+    min-width: 85px;
   }
-  .favored { font-size: 0.65rem; }
-  .odds { font-size: 1.1rem; }
+  .favored { font-size: 0.82rem; }
+  .odds { font-size: 1.4rem; }
+
   .question {
-    font-size: 0.9rem;
-    line-height: 1.2;
+    font-size: 1.1rem;
+    line-height: 1.35;
   }
+
   .prob-bar {
-    height: 7px;
-    margin: 0.3rem 0;
+    height: 9px;
+    margin: 0.5rem 0 0.3rem;
   }
+
   .market-stats {
-    font-size: 0.65rem;
-    gap: 0.7rem;
+    font-size: 0.75rem;
+    gap: 1rem;
   }
   .market-stats span {
-    padding: 0.2rem 0.4rem;
+    padding: 0.3rem 0.6rem;
   }
+
   .expire-timer-top {
-    font-size: 0.7rem;
-    margin: 0.2rem 0;
+    font-size: 0.78rem;
+    margin: 0.3rem 0 0.5rem;
+  }
+
+  .hook {
+    font-size: 1.55rem;
+    line-height: 1.3;
+    margin: 0 0 1rem;
+  }
+
+  .teaser {
+    line-height: 1.55;
+    margin: 0.3rem 0 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .article {
+    line-height: 1.7;
+    margin: 1.2rem 0;
+    font-size: 1rem;
+  }
+
+  .readmore-text {
+    font-size: 0.95rem;
+    margin-top: 0.7rem;
+  }
+
+  .btn-group {
+    margin-top: 1.2rem;
+  }
+  button, .btn-bet {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.92rem;
+  }
+  .btn-collapse {
+    padding: 0.7rem 1.3rem;
+    font-size: 0.88rem;
   }
 }
