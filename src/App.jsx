@@ -1,4 +1,4 @@
-// src/App.jsx – FIXED EXPAND + TITLE CHANGE
+// src/App.jsx — FINAL @sompiUP — NOV 06 2025 10:25 PM EST
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -97,30 +97,37 @@ function App() {
                     className="market-icon"
                   />
                   <div
-                    className={`odds-badge ${
-                      a.favored?.toLowerCase() || "yes"
-                    }`}
+                    className={`odds-badge ${a.favored?.toLowerCase() || "yes"}`}
                   >
                     <span className="favored">{a.favored || "Yes"}</span>
-                    <span className="odds">{a.odds}</span>
+                    <span className="odds">{a.odds || "—"}</span>
                   </div>
-                  <h3 className="question">{a.title}</h3>
+                  <h3 className="question">{a.title || "Loading..."}</h3>
                 </div>
-                <div className="prob-bar">
-                  <div className="fill" style={{ width: a.odds }} />
-                </div>
-                <div className="expire-timer">
+
+                {/* EXPIRES — TOP OF CARD — WALL STREET STYLE */}
+                <div className="expire-timer-top">
                   {a.endDate && formatDate(a.endDate)}
+                </div>
+
+                <div className="prob-bar">
+                  <div className="fill" style={{ width: a.odds || "0%" }} />
+                </div>
+
+                <div className="market-stats">
+                  <span>Vol: ${a.volume24hr?.toLocaleString() || 0}</span>
+                  <span>Liquidity: ${a.liquidity?.toLocaleString() || 0}</span>
+                  <span>Open Int: ${a.openInterest?.toLocaleString() || 0}</span>
                 </div>
               </div>
             </a>
 
             <div className="content">
-              <h2 className="hook">{a.hook}</h2>
+              <h2 className="hook">{a.hook || "Loading hook..."}</h2>
 
               {expanded === a.id ? (
                 <>
-                  <p className="article">{a.article}</p>
+                  <p className="article">{a.article || "Loading article..."}</p>
                   <div className="btn-group">
                     <button
                       onClick={(e) => {
@@ -145,8 +152,10 @@ function App() {
               ) : (
                 <>
                   <p className="teaser">
-                    {a.article.split(" ").slice(0, 120).join(" ")}
-                    {a.article.split(" ").length > 120 && "…"}
+                    {a.article
+                      ? a.article.split(" ").slice(0, 120).join(" ") +
+                        (a.article.split(" ").length > 120 ? "…" : "")
+                      : "Loading..."}
                   </p>
                   <div
                     className="readmore-text"

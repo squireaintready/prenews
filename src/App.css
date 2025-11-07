@@ -254,3 +254,39 @@ button:hover, .btn-bet:hover {
   padding: 6rem;
   color: #00b3cc;
 }
+
+.market-stats {
+  display: flex;
+  gap: 1.2rem;
+  margin: 0.8rem 0 0.4rem;
+  font-size: 0.78rem;
+  color: #aaa;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.market-stats span {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expire-timer {
+  font-size: 0.78rem;
+  color: #666;
+  text-align: right;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+.expire-timer-top {
+  font-size: 0.68rem;
+  color: #ff6b6b;
+  text-align: right;
+  margin: 0.4rem 0 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+}

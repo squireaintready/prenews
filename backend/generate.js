@@ -1,4 +1,4 @@
-// backend/generate.js — NOV 06 2025 09:36 PM EST — @sompiUP
+// backend/generate.js — FINAL @sompiUP — NOV 06 2025 10:15 PM EST
 require('dotenv').config();
 const axios = require('axios');
 const admin = require('firebase-admin');
@@ -17,50 +17,33 @@ admin.initializeApp({
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
-const LIMIT = 10;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
+const LIMIT = 11;
 
 (async () => {
-  console.log('PREDICTION PULSE GENERATOR STARTED — @sompiUP');
+  console.log('PREDICTION PULSE — @sompiUP — USA');
   console.log('Time:', new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
 
   try {
     const { data } = await axios.get(
-      'https://gamma-api.polymarket.com/public-search?q=q&limit_per_type=5&sort=%22volume1mo%22&ascending=true&optimized=true&events_status=%22active%22'
+      `https://gamma-api.polymarket.com/public-search?q=q&limit_per_type=${LIMIT}&sort=%22volume1mo%22&ascending=true&optimized=true&events_status=%22active%22`
     );
 
     if (!data.events?.length) {
-      console.log('No events found');
+      console.log('No events');
       return;
     }
 
-    console.log(`Fetched ${data.events.length} markets → processing ${LIMIT}`);
+    console.log(`Fetched ${data.events.length} → ${LIMIT} new`);
 
     let added = 0;
-    let exists = 0;
-    let skipped = 0;
 
-    for (const e of data.events.slice(0, LIMIT)) {
-      console.log(`\nChecking: ${e.title}`);
-
-      if (!e.id || !e.markets?.[0]) {
-        console.log('   SKIP: malformed event');
-        skipped++;
-        continue;
-      }
+    for (const e of data.events) {
+      if (!e.id || !e.markets?.[0]) continue;
 
       const m = e.markets[0];
-
-      // ORIGINAL API: outcomePrices is array of strings
-      const prices = (m.outcomePrices || [])
-        .map(p => parseFloat(p))
-        .filter(n => !isNaN(n) && n > 0 && n < 1);
-
-      if (prices.length === 0) {
-        console.log('   SKIP: no valid prices');
-        skipped++;
-        continue;
-      }
+      const prices = (m.outcomePrices || []).map(p => parseFloat(p)).filter(n => !isNaN(n));
+      if (prices.length === 0) continue;
 
       const maxIdx = prices.indexOf(Math.max(...prices));
       const favored = m.outcomes[maxIdx] || 'Yes';
@@ -68,20 +51,40 @@ const LIMIT = 10;
 
       const docRef = db.collection('articles').doc(e.id);
       if (await docRef.get().then(d => d.exists)) {
-        console.log('   ALREADY EXISTS');
-        exists++;
+        console.log('EXISTS:', e.title);
         continue;
       }
 
+      // FULL EVENT DATA
+      let volume = e.volume || 0;
+      let liquidity = 0;
+      let openInterest = 0;
+      try {
+        const eventRes = await axios.get(`https://gamma-api.polymarket.com/events/${e.id}`);
+        const full = eventRes.data;
+        volume = full.volume || volume;
+        liquidity = full.liquidity || 0;
+        openInterest = full.openInterest || 0;
+      } catch (err) {
+        console.log('EVENT API FAILED');
+      }
+
       const prompt = `Joe Rogan voice, viral news post about: "${e.title}"
-TONE: Professional, clear, analytical. Subtle Rogan vibe: curious, direct, conversational. NO swearing, NO "dude", NO exaggeration.
+TONE: Professional, clear, analytical. Subtle Rogan vibe: curious, direct, conversational.
+NO swearing, NO "dude", NO exaggeration, NO asterisks, NO hashtags, NO markdown.
+
 Cover: current odds, market dynamics, key drivers, future risks, final assessment.
-End with a strong, thoughtful conclusion
+End with a strong, thoughtful conclusion.
 
 Favored: ${favored} at ${odds}
+
 Give me:
-1. One-line hook (no quotes)
-2. 300-word article – intense, curious, conversational
+1. ONE-LINE HEADLINE HOOK (no quotes, max 12 words) — MUST end with:
+   - "?" if question
+   - "…" if incomplete thought
+   - "!" if bold statement
+   Make it punchy, viral, impossible to ignore.
+2. 250-word article – intense, curious, conversational
 Today: November 06, 2025`;
 
       try {
@@ -89,27 +92,32 @@ Today: November 06, 2025`;
           contents: [{ role: "user", parts: [{ text: prompt }] }]
         });
 
-        let rawText = '';
-        try {
-          const candidate = res.data.candidates?.[0];
-          if (candidate?.content?.parts?.[0]?.text) {
-            rawText = candidate.content.parts[0].text;
-          } else {
-            rawText = "Gemini returned no text.";
-          }
-        } catch (err) {
-          rawText = "Parse error.";
+        const candidate = res.data.candidates?.[0];
+        if (candidate?.functionCall) {
+          console.log('BLOCKED: functionCall');
+          continue;
         }
 
+        let rawText = candidate?.content?.parts?.[0]?.text || "No response.";
+
+        // KILL ALL SYMBOLS
         rawText = rawText
-          .replace(/raceName.*/gi, '')
+          .replace(/[*#]/g, '')
           .replace(/```[\s\S]*?```/g, '')
           .replace(/^\s*[\r\n]/gm, '')
           .trim();
 
-        const lines = rawText.split('\n\n').map(l => l.trim()).filter(Boolean);
-        const hook = lines[0] || "This market is heating up.";
-        const article = lines.slice(1).join('\n\n') || "No analysis available.";
+        const splitIndex = rawText.search(/\n\s*2[\.\)\-]\s/i);
+        let hook = "This market is heating up.";
+        let article = "No analysis available.";
+
+        if (splitIndex !== -1) {
+          hook = rawText.substring(0, splitIndex).trim();
+          article = rawText.substring(splitIndex).trim();
+        } else {
+          hook = rawText.split('\n')[0] || hook;
+          article = rawText;
+        }
 
         await docRef.set({
           id: e.id,
@@ -120,24 +128,26 @@ Today: November 06, 2025`;
           article: article.trim(),
           favored,
           odds,
-          volume24hr: e.volume24hr || 0,
+          volume24hr: volume,
+          liquidity,
+          openInterest,
           endDate: e.endDate,
           createdAt: new Date()
         });
 
-        console.log(`   ADDED: ${favored} @ ${odds}`);
+        console.log(`ADDED: ${e.title}`);
+        console.log(`   Hook: "${hook}"`);
+        console.log(`   Volume: $${volume.toLocaleString()}`);
+        console.log(`   Liquidity: $${liquidity.toLocaleString()}`);
+        console.log(`   Open Interest: $${openInterest.toLocaleString()}`);
         added++;
-      } catch (geminiErr) {
-        console.log('   GEMINI FAILED');
-        skipped++;
+      } catch (err) {
+        console.log('GEMINI FAILED:', e.title);
       }
     }
 
-    console.log('\nRUN COMPLETE');
-    console.log(`   Added: ${added}`);
-    console.log(`   Exists: ${exists}`);
-    console.log(`   Skipped: ${skipped}`);
-    console.log(`   @sompiUP — Prediction Pulse is LIVE`);
+    console.log(`\nFINISHED — ${added} NEW ARTICLES`);
+    console.log(`@sompiUP — https://prenews.vercel.app`);
 
   } catch (err) {
     console.error('FATAL:', err.response?.data || err.message);
