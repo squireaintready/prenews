@@ -117,7 +117,7 @@ function App() {
                 <div className="market-stats">
                   <span>Vol: ${a.volume24hr?.toLocaleString() || 0}</span>
                   <span>Liquidity: ${a.liquidity?.toLocaleString() || 0}</span>
-                  <span>Open Int: ${a.openInterest?.toLocaleString() || 0}</span>
+                  {/* <span>Open Int: ${a.openInterest?.toLocaleString() || 0}</span> */}
                 </div>
               </div>
             </a>
