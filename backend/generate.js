@@ -1,28 +1,31 @@
 // backend/generate.js — FINAL @sompiUP — NOV 06 2025 10:15 PM EST
-require('dotenv').config();
-const axios = require('axios');
-const admin = require('firebase-admin');
+require("dotenv").config();
+const axios = require("axios");
+const admin = require("firebase-admin");
 
 let serviceAccount;
 if (process.env.FIREBASE_ADMIN_SDK) {
   serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 } else {
-  serviceAccount = require('./adminsdk.json');
+  serviceAccount = require("./adminsdk.json");
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`;
-const LIMIT = 50;
+const LIMIT = 25;
 
 (async () => {
-  console.log('PREDICTION PULSE — @sompiUP — USA');
-  console.log('Time:', new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  console.log("PREDICTION PULSE — @sompiUP — USA");
+  console.log(
+    "Time:",
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+  );
 
   try {
     const { data } = await axios.get(
@@ -30,7 +33,7 @@ const LIMIT = 50;
     );
 
     if (!data.events?.length) {
-      console.log('No events');
+      console.log("No events");
       return;
     }
 
@@ -42,16 +45,18 @@ const LIMIT = 50;
       if (!e.id || !e.markets?.[0]) continue;
 
       const m = e.markets[0];
-      const prices = (m.outcomePrices || []).map(p => parseFloat(p)).filter(n => !isNaN(n));
+      const prices = (m.outcomePrices || [])
+        .map((p) => parseFloat(p))
+        .filter((n) => !isNaN(n));
       if (prices.length === 0) continue;
 
       const maxIdx = prices.indexOf(Math.max(...prices));
-      const favored = m.outcomes[maxIdx] || 'Yes';
-      const odds = (prices[maxIdx] * 100).toFixed(0) + '%';
+      const favored = m.outcomes[maxIdx] || "Yes";
+      const odds = (prices[maxIdx] * 100).toFixed(0) + "%";
 
-      const docRef = db.collection('articles').doc(e.id);
-      if (await docRef.get().then(d => d.exists)) {
-        console.log('EXISTS:', e.title);
+      const docRef = db.collection("articles").doc(e.id);
+      if (await docRef.get().then((d) => d.exists)) {
+        console.log("EXISTS:", e.title);
         continue;
       }
 
@@ -60,41 +65,59 @@ const LIMIT = 50;
       let liquidity = 0;
       let openInterest = 0;
       try {
-        const eventRes = await axios.get(`https://gamma-api.polymarket.com/events/${e.id}`);
+        const eventRes = await axios.get(
+          `https://gamma-api.polymarket.com/events/${e.id}`
+        );
         const full = eventRes.data;
         volume = full.volume || volume;
         liquidity = full.liquidity || 0;
         openInterest = full.openInterest || 0;
       } catch (err) {
-        console.log('EVENT API FAILED');
+        console.log("EVENT API FAILED");
       }
 
-      const prompt = `Joe Rogan voice, viral news post about: "${e.title}"
-TONE: Professional, clear, analytical. Subtle Rogan vibe: curious, direct, conversational.
-NO swearing, NO "dude", NO exaggeration, NO asterisks, NO hashtags, NO markdown.
+      const prompt = `You are a senior market analyst guest on JRE.
 
-Cover: current odds, market dynamics, key drivers, future risks, final assessment.
-End with a strong, thoughtful conclusion.
+Write in third-person, professional tone with subtle Joe Rogan curiosity.
 
-Favored: ${favored} at ${odds}
+Event: "${e.title}"
+Market favorite: ${favored} at ${odds}
+24h volume: $${volume.toLocaleString()}
+Liquidity: $${liquidity.toLocaleString()}
+Open interest: $${openInterest.toLocaleString()}
 
-Give me:
-1. ONE-LINE HEADLINE HOOK (no quotes, max 12 words) — MUST end with:
-   - "?" if question
-   - "…" if incomplete thought
-   - "!" if bold statement
-   Make it punchy, viral, impossible to ignore.
-2. 250-word article – intense, curious, conversational
-Today: November 06, 2025`;
+Structure:
+1. 11-word headline hook ending in ? … or !
+2. 250-word dispatch covering:
+   - Current pricing and momentum
+   - Three key drivers moving the market today
+   - One material risk traders are pricing in
+   - Closing assessment of where the smart money sits
+
+No predictions, no advice, no first-person, no markdown, no hashtags.
+
+Pure analytical observation. Date: November 06, 2025`;
 
       try {
         const res = await axios.post(GEMINI_URL, {
-          contents: [{ role: "user", parts: [{ text: prompt }] }]
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_NONE",
+            },
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_NONE",
+            },
+          ],
         });
 
         const candidate = res.data.candidates?.[0];
         if (candidate?.functionCall) {
-          console.log('BLOCKED: functionCall');
+          console.log("BLOCKED: functionCall");
           continue;
         }
 
@@ -102,9 +125,9 @@ Today: November 06, 2025`;
 
         // KILL ALL SYMBOLS
         rawText = rawText
-          .replace(/[*#]/g, '')
-          .replace(/```[\s\S]*?```/g, '')
-          .replace(/^\s*[\r\n]/gm, '')
+          .replace(/[*#]/g, "")
+          .replace(/```[\s\S]*?```/g, "")
+          .replace(/^\s*[\r\n]/gm, "")
           .trim();
 
         const splitIndex = rawText.search(/\n\s*2[\.\)\-]\s/i);
@@ -115,7 +138,7 @@ Today: November 06, 2025`;
           hook = rawText.substring(0, splitIndex).trim();
           article = rawText.substring(splitIndex).trim();
         } else {
-          hook = rawText.split('\n')[0] || hook;
+          hook = rawText.split("\n")[0] || hook;
           article = rawText;
         }
 
@@ -123,7 +146,7 @@ Today: November 06, 2025`;
           id: e.id,
           title: e.title,
           slug: e.slug,
-          image: e.image || '',
+          image: e.image || "",
           hook: hook.trim(),
           article: article.trim(),
           favored,
@@ -132,7 +155,7 @@ Today: November 06, 2025`;
           liquidity,
           openInterest,
           endDate: e.endDate,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
 
         console.log(`ADDED: ${e.title}`);
@@ -142,14 +165,13 @@ Today: November 06, 2025`;
         console.log(`   Open Interest: $${openInterest.toLocaleString()}`);
         added++;
       } catch (err) {
-        console.log('GEMINI FAILED:', e.title);
+        console.log("GEMINI FAILED:", e.title);
       }
     }
 
     console.log(`\nFINISHED — ${added} NEW ARTICLES`);
     console.log(`@sompiUP — https://prenews.vercel.app`);
-
   } catch (err) {
-    console.error('FATAL:', err.response?.data || err.message);
+    console.error("FATAL:", err.response?.data || err.message);
   }
 })();
