@@ -6,18 +6,21 @@ on:
     # to US Eastern DAYLIGHT time (EDT = UTC-4 → UTC = ET + 4). When the US falls back to
     # EST (UTC-5) in early November, shift each hour range +1 to preserve the same ET windows.
     #
-    # Sized to stay FREE on a PRIVATE repo (free Actions budget = 2,000 min/mo; each run
-    # bills ~1.8 min — ~1.2 min wall, rounded UP to the next whole minute). Spend is
-    # concentrated where prediction markets actually move: every 30 min during US market
-    # hours, hourly in the active off-market windows, and lean (every-2-3h) overnight +
-    # weekends. ~147 runs/wk → ~1,150 billable min/mo, leaving ~850 min/mo headroom.
-    - cron: '0,30 14-19 * * 1-5' # WEEKDAY MARKET HOURS: every 30 min, 10am-3:30pm ET (mirror: env.MARKET_HOURS_CRON)
-    - cron: '0 11-13 * * 1-5' # weekdays: hourly 7-9am ET (pre-open)
-    - cron: '0 20-23 * * 1-5' # weekdays: hourly 4-7pm ET (market close + evening)
-    - cron: '0 0-2 * * 1-5' # weekdays: hourly 8-10pm ET (UTC next-day wrap)
-    - cron: '0 3,6,9 * * *' # overnight: every ~3h (11pm / 2am / 5am ET), all days
-    - cron: '0 11,13,15,17,19,21,23 * * 0,6' # weekends: every 2h, 7am-7pm ET
-    - cron: '0 1 * * 0,6' # weekends: 9pm ET (UTC next-day wrap)
+    # Public repo → Actions minutes are UNLIMITED, so cadence targets FRESHNESS, not a
+    # minute budget. Spend is concentrated where prediction markets actually move: every
+    # 15 min during US market hours, hourly in the active off-market windows, and lean
+    # (every ~2-3h) overnight + weekends (~217 runs/wk). The binding constraints are now
+    # the LLM free tiers + scraped-endpoint politeness (see the groq.ts pool + the
+    # GDELT/bridging market-hours skips below), NOT GitHub minutes. Sparse tiers fire at
+    # :05 (not the contended :00) to dodge GitHub's scheduled-run lag.
+    - cron: '0,15,30,45 14-19 * * 1-5' # WEEKDAY MARKET HOURS: every 15 min, 10am-3:45pm ET (mirror: env.MARKET_HOURS_CRON)
+    - cron: '30,45 13 * * 1-5' # weekdays: market OPEN burst — 9:30 & 9:45am ET (the most volatile minutes)
+    - cron: '5 11-13 * * 1-5' # weekdays: hourly 7-9am ET (pre-open)
+    - cron: '5 20-23 * * 1-5' # weekdays: hourly 4-7pm ET (market close + evening)
+    - cron: '5 0-2 * * 1-5' # weekdays: hourly 8-10pm ET (UTC next-day wrap)
+    - cron: '5 3,6,9 * * *' # overnight: every ~3h (11pm / 2am / 5am ET), all days
+    - cron: '5 11,13,15,17,19,21,23 * * 0,6' # weekends: every 2h, 7am-7pm ET
+    - cron: '5 1 * * 0,6' # weekends: 9pm ET (UTC next-day wrap)
   workflow_dispatch:
     inputs:
       backfill:
@@ -42,7 +45,7 @@ concurrency:
 # the GDELT-skip can't drift apart. GitHub can't template the `on.schedule` literal
 # above, so keep this byte-identical to that cron entry (search "MARKET_HOURS_CRON").
 env:
-  MARKET_HOURS_CRON: '0,30 14-19 * * 1-5'
+  MARKET_HOURS_CRON: '0,15,30,45 14-19 * * 1-5'
 
 jobs:
   pulse:
@@ -54,7 +57,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -178,12 +181,19 @@ jobs:
             echo "Full run — build+deploy enabled."
           fi
 
-      - name: Test, typecheck, build
-        if: steps.gate.outputs.deploy == 'true'
+      # typecheck + tests re-validate CODE, which can't change on a scheduled (data-only
+      # refresh) run — they already ran on the push/PR that introduced the code. Skip them
+      # on schedule for faster deploys; keep them on direct pushes to main + manual dispatch.
+      # `build` (the real data-poison gate) always runs when we deploy.
+      - name: Typecheck + test (skipped on scheduled data refreshes)
+        if: steps.gate.outputs.deploy == 'true' && github.event_name != 'schedule'
         run: |
           npm run typecheck
           npm run test
-          npm run build
+
+      - name: Build
+        if: steps.gate.outputs.deploy == 'true'
+        run: npm run build
         env:
           # BASE_PATH repo variable is "/" for the crowdtells.com custom domain.
           BASE_PATH: ${{ vars.BASE_PATH }}
