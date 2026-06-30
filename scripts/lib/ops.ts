@@ -29,7 +29,7 @@ interface PipelineRunRow {
 
 const RETENTION_DAYS = 30;
 const DAY_MS = 86_400_000;
-const REPO = 'squireaintready/prenews';
+const REPO = 'squireaintready/crowdtells';
 
 function ctxOrNull(): AdminCtx | null {
   try {

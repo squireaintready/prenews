@@ -982,7 +982,7 @@ export function App() {
             <a href={`${import.meta.env.BASE_URL}terms`}>Terms</a>
             <a href={`${import.meta.env.BASE_URL}feed.xml`}>RSS</a>
             <a
-              href="https://github.com/squireaintready/prenews"
+              href="https://github.com/squireaintready/crowdtells"
               target="_blank"
               rel="noopener noreferrer"
             >

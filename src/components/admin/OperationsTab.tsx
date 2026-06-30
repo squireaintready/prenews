@@ -195,7 +195,7 @@ export function OperationsView({ rows, total, loading, error, onReload }: Operat
                   <>
                     {' · '}
                     <a
-                      href={`https://github.com/squireaintready/prenews/actions/runs/${latest!.run_id}`}
+                      href={`https://github.com/squireaintready/crowdtells/actions/runs/${latest!.run_id}`}
                       target="_blank"
                       rel="noreferrer"
                       className={s.opsLink}
