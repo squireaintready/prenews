@@ -253,4 +253,7 @@ automatically); set the `BASE_PATH` variable to `/` so the app serves from the r
 
 ## License
 
-MIT © Samuel Jo ([@squireaintready](https://github.com/squireaintready))
+**Source-available, not open source.** Published openly for transparency under the
+[PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and share for
+**noncommercial** purposes; **commercial use requires a separate license**.
+© 2026 Samuel Jo ([@squireaintready](https://github.com/squireaintready)).

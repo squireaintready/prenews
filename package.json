@@ -5,7 +5,7 @@
   "type": "module",
   "description": "A news feed driven by prediction markets. Reads Polymarket + Kalshi as a signal of what matters, then briefs you with grounded, cross-source reporting. 100% free, static, GitHub-native.",
   "homepage": "https://crowdtells.com/",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Samuel Jo (@squireaintready)",
   "engines": {
     "node": ">=20"
