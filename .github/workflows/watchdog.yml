@@ -1,0 +1,80 @@
+name: Freshness Watchdog
+
+# Liveness check that runs INDEPENDENTLY of the pulse pipeline. The pipeline's own
+# "Alert on failure" step cannot fire when a run dies at STARTUP, and there is no
+# ALERT_WEBHOOK configured — that is exactly why the 2026-06-29 billing outage was
+# silent for 14h. This job instead checks the PUBLISHED feed's freshness (the observable
+# symptom of ANY failure — code bug, API outage, deploy/persist failure, or the pipeline
+# not running) and emails OPS_ALERT_EMAIL via Mailgun when the feed has not refreshed in
+# STALE_HOURS. Runs free on the public repo. BUILD_EVERY_RUN=true keeps feed.json fresh
+# every run, so generatedAt is a reliable beacon. (Blind only to a total GitHub-Actions
+# outage; the billing failure that caused the original outage is impossible on a public repo.)
+on:
+  schedule:
+    - cron: '15 * * * *' # hourly at :15 (off the contended :00)
+  workflow_dispatch:
+    inputs:
+      force_alert:
+        description: 'true = send a test alert regardless of freshness (verifies the email path)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: watchdog
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check feed freshness; alert if stale
+        env:
+          FEED_URL: https://crowdtells.com/feed.json
+          STALE_HOURS: '4'
+          FORCE_ALERT: ${{ inputs.force_alert }}
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          MAILGUN_DOMAIN: ${{ vars.MAILGUN_DOMAIN }}
+          MAILGUN_REGION: ${{ vars.MAILGUN_REGION }}
+          OPS_ALERT_EMAIL: ${{ secrets.OPS_ALERT_EMAIL }}
+          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          now=$(date -u +%s)
+          gen=$(curl -fsS -m 20 "$FEED_URL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('generatedAt') or '')" 2>/dev/null || echo "")
+          if [ -z "$gen" ]; then
+            stale=1; detail="feed.json unreachable or missing generatedAt ($FEED_URL)"
+          else
+            gens=$(date -u -d "$gen" +%s 2>/dev/null || echo 0)
+            age_h=$(( (now - gens) / 3600 ))
+            if [ "$gens" -gt 0 ] && [ "$age_h" -ge "$STALE_HOURS" ]; then
+              stale=1; detail="feed is ${age_h}h stale (generatedAt $gen)"
+            else
+              stale=0; detail="feed fresh (~${age_h}h old)"
+            fi
+          fi
+          echo "watchdog: $detail"
+          if [ "${FORCE_ALERT:-false}" = "true" ]; then stale=1; detail="TEST alert (force_alert) — $detail"; fi
+          if [ "$stale" != "1" ]; then echo "OK — nothing to alert"; exit 0; fi
+
+          echo "::warning::Crowdtells freshness watchdog tripped — $detail"
+          msg="Crowdtells pulse pipeline may be DOWN — $detail. The published feed has not refreshed. Check https://github.com/$REPO/actions"
+          if [ -n "${MAILGUN_API_KEY:-}" ] && [ -n "${OPS_ALERT_EMAIL:-}" ] && [ -n "${MAILGUN_DOMAIN:-}" ]; then
+            host="https://api.mailgun.net"; [ "${MAILGUN_REGION:-}" = "eu" ] && host="https://api.eu.mailgun.net"
+            curl -s --user "api:$MAILGUN_API_KEY" "$host/v3/$MAILGUN_DOMAIN/messages" \
+              -F from="Crowdtells Watchdog <watchdog@$MAILGUN_DOMAIN>" \
+              -F to="$OPS_ALERT_EMAIL" \
+              -F subject="🚨 Crowdtells pipeline stale — $detail" \
+              -F text="$msg" && echo "alert email sent to $OPS_ALERT_EMAIL"
+          else
+            echo "::warning::Mailgun creds missing — cannot send the email alert"
+          fi
+          if [ -n "${ALERT_WEBHOOK:-}" ]; then
+            curl -s -m 10 -X POST -H 'Content-Type: application/json' -d "{\"text\":\"🚨 $msg\"}" "$ALERT_WEBHOOK" || true
+          fi
+          # Non-zero so the run shows as failed in the Actions list (a second visible signal).
+          exit 1
