@@ -24,16 +24,31 @@
   pointer-events: auto;
   background: var(--elevated);
   border: 1px solid var(--border-strong);
-  border-left: 3px solid var(--accent);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-2);
   /* No overflow clip: the level-up ring-burst + the medallion glow are meant to spill past the
      card edge. The timer line is inset (below) so it still respects the rounded corners. */
   animation: toastIn 480ms cubic-bezier(0.2, 0.85, 0.3, 1.2) both;
 }
+
+/* Left accent edge — fades from its vertical center per the left-highlight rule. Inset by the
+   corner radius so the fade sits on the straight edge, clear of the rounded corners (no overflow
+   clip needed, so the ring-burst + glow still spill freely). */
+.toast::before {
+  content: '';
+  position: absolute;
+  top: var(--r-lg);
+  bottom: var(--r-lg);
+  left: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+  pointer-events: none;
+}
 .levelToast {
-  border-left-color: #cda23f;
   background: linear-gradient(120deg, rgba(205, 162, 63, 0.1), transparent 60%), var(--elevated);
+}
+.levelToast::before {
+  background: linear-gradient(to bottom, transparent, #cda23f, transparent);
 }
 
 .body {

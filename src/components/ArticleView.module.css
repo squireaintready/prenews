@@ -299,11 +299,23 @@
    An accent callout, distinct from the neutral briefing: a left accent edge over a
    tinted ground, the take itself in italic serif. */
 .take {
+  position: relative;
   margin: 0;
   padding: var(--s-3) var(--s-4);
-  border-left: 3px solid var(--accent);
   border-radius: 0 var(--r) var(--r) 0;
   background: var(--accent-tint);
+}
+
+/* Left accent edge — fades from its vertical center (transparent top & bottom,
+   brightest in the middle) per the left-highlight rule. */
+.take::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
 }
 
 .takeKicker {

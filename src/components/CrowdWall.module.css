@@ -57,12 +57,14 @@
   gap: 0.4em;
 }
 
-/* A small swatch echoing the row's left rule (a colored left edge on a quiet tile). */
+/* A small swatch echoing the row's left rule: a 3px colored left edge on a quiet tile,
+   fading from its vertical center just like the row rule. */
 .legendSwatch {
   width: 0.625rem;
   height: 0.625rem;
-  background: var(--surface-2);
-  border-left: 3px solid currentColor;
+  background:
+    linear-gradient(to bottom, transparent, currentColor, transparent) left / 3px 100% no-repeat,
+    var(--surface-2);
 }
 
 .legendAhead {
@@ -130,21 +132,22 @@
   background: var(--accent-tint);
 }
 
-/* 3px left rule, colored by the crowd-vs-coverage read. */
+/* 3px left rule, colored by the crowd-vs-coverage read. Per the left-highlight rule
+   it fades from its vertical center — transparent at the row's top and bottom, brightest
+   in the middle — rather than reading as a solid bar. */
 .rule {
   flex: 0 0 3px;
   align-self: stretch;
-  border-radius: 2px;
 }
 
 .ruleAhead {
-  background: var(--accent);
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
 }
 .ruleContested {
-  background: var(--down);
+  background: linear-gradient(to bottom, transparent, var(--down), transparent);
 }
 .ruleAligned {
-  background: var(--border-strong);
+  background: linear-gradient(to bottom, transparent, var(--border-strong), transparent);
 }
 
 /* Odds — fixed-width column so the eye reads straight down; the one bit of accent. */
